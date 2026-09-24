@@ -1,5 +1,12 @@
 # Leafy Manor – Blender Model Requests (Entrance Hall)
 
+> **Status:** your 9 kit sheets are now split into 73 game-ready models (see `ModelKit.md`), which covers the
+> wall kit, doors, windows, columns, balustrades, fountain, banners, sofa, chess table, chairs, bookcases, planters,
+> plants, candles, candelabras, sconces, floor tiles and rugs.
+> **Still needed:** knight armour, lion statue, crowned dog statue, chandelier, fireplace, grandfather clock, bust.
+> Sizes below are from the original plan. The hall's story height is changing to 514 cm to fit your wall kit, so
+> ask me for updated numbers before modelling anything that attaches to walls.
+
 All sizes are **final in-game centimetres**, matching the blockout at `LM_SCALE = 0.68`, which fits your 97.8 cm character.
 If you change `LM_SCALE`, multiply every size here by `new_scale / 0.68`.
 

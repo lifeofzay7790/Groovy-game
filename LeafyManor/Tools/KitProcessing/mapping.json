@@ -1,0 +1,1071 @@
+[
+ {
+  "name": "SM_LM_Wall_Plain_01",
+  "src": "door_set_P01",
+  "category": "Architecture",
+  "size": [
+   272,
+   55,
+   514
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center_back",
+  "tris": 40000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Wall_DoorSingle_01",
+  "src": "door_set_P04",
+  "category": "Architecture",
+  "size": [
+   272,
+   55,
+   514
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center_back",
+  "tris": 40000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Wall_DoorDouble_01",
+  "src": "door_set_P05",
+  "category": "Architecture",
+  "size": [
+   272,
+   55,
+   514
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center_back",
+  "tris": 40000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Wall_Arch_01",
+  "src": "door_set_P06",
+  "category": "Architecture",
+  "size": [
+   272,
+   55,
+   514
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center_back",
+  "tris": 40000,
+  "collision": [
+   [
+    -136,
+    -71,
+    -55,
+    0,
+    0,
+    514
+   ],
+   [
+    71,
+    136,
+    -55,
+    0,
+    0,
+    514
+   ],
+   [
+    -71,
+    71,
+    -55,
+    0,
+    355,
+    514
+   ]
+  ]
+ },
+ {
+  "name": "SM_LM_Wall_Window_01",
+  "src": "door_set_P07",
+  "category": "Architecture",
+  "size": [
+   272,
+   55,
+   514
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center_back",
+  "tris": 40000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Column_Ornate_01",
+  "src": "door_set_P02",
+  "category": "Architecture",
+  "size": [
+   null,
+   null,
+   364
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 15000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Column_Plain_01",
+  "src": "door_set_P03",
+  "category": "Architecture",
+  "size": [
+   null,
+   null,
+   364
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 12000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Cornice_01",
+  "src": "door_set_P09",
+  "category": "Architecture",
+  "size": [
+   272,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center_back",
+  "tris": 15000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Trim_Band_01",
+  "src": "door_set_P10",
+  "category": "Architecture",
+  "size": [
+   272,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center_back",
+  "tris": 6000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Balustrade_01",
+  "src": "Stairs_P04",
+  "category": "Architecture",
+  "size": [
+   136,
+   null,
+   61
+  ],
+  "fit": "exact_wh",
+  "pivot": "bottom_center",
+  "tris": 20000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_NewelPost_01",
+  "src": "Stairs_P01",
+  "category": "Architecture",
+  "size": [
+   null,
+   null,
+   102
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 10000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Post_01",
+  "src": "Stairs_P03",
+  "category": "Architecture",
+  "size": [
+   null,
+   null,
+   70
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 6000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Baluster_01",
+  "src": "Stairs_P02",
+  "category": "Architecture",
+  "size": [
+   null,
+   null,
+   55
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 4000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_StairStringer_01",
+  "src": "Stairs_P12",
+  "category": "Architecture",
+  "size": [
+   860,
+   30,
+   530
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center",
+  "tris": 12000,
+  "collision": "none",
+  "rot_z": 90
+ },
+ {
+  "name": "SM_LM_Fountain_01",
+  "src": "Architecture_P12",
+  "category": "Props",
+  "size": [
+   420,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 80000,
+  "collision": "hull"
+ },
+ {
+  "name": "SM_LM_CrownOrnament_01",
+  "src": "Architecture_P14",
+  "category": "Props",
+  "size": [
+   60,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 15000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Pedestal_01",
+  "src": "Architecture_P07",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   100
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 8000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Banner_Crown_01",
+  "src": "Architecture_P10",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   400
+  ],
+  "fit": "height",
+  "pivot": "top_center_back",
+  "tris": 12000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Plaque_01",
+  "src": "Architecture_P09",
+  "category": "Props",
+  "size": [
+   150,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center_back",
+  "tris": 10000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Medallion_01",
+  "src": "Architecture_P05",
+  "category": "Props",
+  "size": [
+   80,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center_back",
+  "tris": 8000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Trim_Gold_01",
+  "src": "Architecture_P08",
+  "category": "Architecture",
+  "size": [
+   272,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center_back",
+  "tris": 8000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Valance_01",
+  "src": "Architecture_P11",
+  "category": "Props",
+  "size": [
+   272,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "top_center_back",
+  "tris": 12000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Sofa_01",
+  "src": "key_prop_sheet_P08c",
+  "category": "Furniture",
+  "size": [
+   170,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 30000,
+  "collision": "box",
+  "align": "pca"
+ },
+ {
+  "name": "SM_LM_OttomanChest_01",
+  "src": "key_prop_sheet_P08a",
+  "category": "Furniture",
+  "size": [
+   70,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 10000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Rug_Lounge_01",
+  "src": "key_prop_sheet_P08b",
+  "category": "Furniture",
+  "size": [
+   300,
+   297,
+   2
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center",
+  "tris": 12000,
+  "collision": "none",
+  "align": "flat"
+ },
+ {
+  "name": "SM_LM_ChessTable_01",
+  "src": "key_prop_sheet_P09b",
+  "category": "Furniture",
+  "size": [
+   80,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 25000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Chair_01",
+  "src": "key_prop_sheet_P09a",
+  "category": "Furniture",
+  "size": [
+   null,
+   null,
+   85
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 12000,
+  "collision": "box",
+  "align": "pca"
+ },
+ {
+  "name": "SM_LM_Globe_01",
+  "src": "key_prop_sheet_P04a",
+  "category": "Furniture",
+  "size": [
+   null,
+   null,
+   90
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 12000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Candelabra_Table_01",
+  "src": "key_prop_sheet_P04b",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   45
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 8000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Bookcase_Crown_01",
+  "src": "key_prop_sheet_P13",
+  "category": "Furniture",
+  "size": [
+   null,
+   null,
+   230
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 20000,
+  "collision": "box",
+  "align": "pca"
+ },
+ {
+  "name": "SM_LM_TreasureChest_01",
+  "src": "key_prop_sheet_P15",
+  "category": "Furniture",
+  "size": [
+   70,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 10000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_TreasureChest_Open_01",
+  "src": "key_prop_sheet_P12b",
+  "category": "Furniture",
+  "size": [
+   80,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 15000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Crate_Crown_01",
+  "src": "key_prop_sheet_P06",
+  "category": "Furniture",
+  "size": [
+   60,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 6000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Vase_01",
+  "src": "key_prop_sheet_P02",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   70
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 8000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_FruitBowl_01",
+  "src": "key_prop_sheet_P07",
+  "category": "Props",
+  "size": [
+   35,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 8000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Bookshelf_01",
+  "src": "Props_and_foliage_P03b",
+  "category": "Furniture",
+  "size": [
+   198,
+   55,
+   218
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center",
+  "tris": 25000,
+  "collision": "box",
+  "align": "pca",
+  "flip_front": true
+ },
+ {
+  "name": "SM_LM_Urn_Stone_01",
+  "src": "Props_and_foliage_P03a",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   75
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 12000,
+  "collision": "box",
+  "keep_x": [
+   0.0,
+   0.5
+  ]
+ },
+ {
+  "name": "SM_LM_Urn_Gold_01",
+  "src": "Props_and_foliage_P03a",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   75
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 12000,
+  "collision": "box",
+  "keep_x": [
+   0.5,
+   1.0
+  ]
+ },
+ {
+  "name": "SM_LM_Plant_Potted_01",
+  "src": "Props_and_foliage_P02c",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   110
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 25000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Ivy_Hanging_01",
+  "src": "Props_and_foliage_P02a",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   120
+  ],
+  "fit": "height",
+  "pivot": "top_center_back",
+  "tris": 20000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Ivy_Hanging_02",
+  "src": "Props_and_foliage_P02f",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   120
+  ],
+  "fit": "height",
+  "pivot": "top_center_back",
+  "tris": 20000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Ottoman_Blue_01",
+  "src": "Props_and_foliage_P02b",
+  "category": "Furniture",
+  "size": [
+   null,
+   null,
+   40
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 6000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Ottoman_Purple_01",
+  "src": "Props_and_foliage_P04",
+  "category": "Furniture",
+  "size": [
+   null,
+   null,
+   40
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 6000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Books_01",
+  "src": "Props_and_foliage_P05",
+  "category": "Props",
+  "size": [
+   40,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 6000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Candle_01",
+  "src": "Props_and_foliage_P06",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   20
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 2000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_OrnateTable_01",
+  "src": "Props_and_foliage_P08",
+  "category": "Furniture",
+  "size": [
+   90,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 15000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Fire_01",
+  "src": "Props_and_foliage_P09",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   90
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 8000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Moon_01",
+  "src": "Lighting_and_mood_P01",
+  "category": "Props",
+  "size": [
+   700,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 8000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_CandleCup_01",
+  "src": "Lighting_and_mood_P02",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   35
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 6000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Candelabra_Floor_01",
+  "src": "Lighting_and_mood_P03",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   130
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 12000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Candelabra_Small_01",
+  "src": "Lighting_and_mood_P03",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   55
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 8000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Candle_Pillar_01",
+  "src": "Lighting_and_mood_P05",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   30
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 4000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Candle_Pillar_02",
+  "src": "Lighting_and_mood_P06",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   38
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 4000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Torch_01",
+  "src": "Lighting_and_mood_P07",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   60
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 8000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Lantern_01",
+  "src": "Lighting_and_mood_P08",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   55
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 10000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_SconcePlate_01",
+  "src": "Lighting_and_mood_P11",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   45
+  ],
+  "fit": "height",
+  "pivot": "back_center",
+  "tris": 4000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Backdrop_CastleCliff_01",
+  "src": "Lighting_and_mood_P04",
+  "category": "Props",
+  "size": [
+   3000,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 40000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_WallSconce_Torch_01",
+  "src": "Architectural_element_P07",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   55
+  ],
+  "fit": "height",
+  "pivot": "back_center",
+  "tris": 6000,
+  "collision": "none",
+  "rot_z": 90
+ },
+ {
+  "name": "SM_LM_Chain_01",
+  "src": "Architectural_element_P08",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   100
+  ],
+  "fit": "height",
+  "pivot": "top_center",
+  "tris": 3000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Banner_Red_01",
+  "src": "Architectural_element_P01",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   400
+  ],
+  "fit": "height",
+  "pivot": "top_center_back",
+  "tris": 12000,
+  "collision": "none",
+  "align": "vertical"
+ },
+ {
+  "name": "SM_LM_Plant_CrownPot_01",
+  "src": "Environment_details_P01",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   120
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 25000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Flowers_Hanging_01",
+  "src": "Environment_details_P02",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   110
+  ],
+  "fit": "height",
+  "pivot": "top_center_back",
+  "tris": 20000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Plant_Fern_01",
+  "src": "Environment_details_P03",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   80
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 20000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Planter_Flowers_01",
+  "src": "Environment_details_P04",
+  "category": "Props",
+  "size": [
+   120,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 25000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_LilyPads_01",
+  "src": "Environment_details_P05",
+  "category": "Props",
+  "size": [
+   100,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 10000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Cushion_Leaf_01",
+  "src": "Environment_details_P06",
+  "category": "Props",
+  "size": [
+   55,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 6000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Rug_Crown_01",
+  "src": "Environment_details_P11",
+  "category": "Props",
+  "size": [
+   340,
+   325,
+   2
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center",
+  "tris": 12000,
+  "collision": "none",
+  "align": "flat"
+ },
+ {
+  "name": "SM_LM_FloorTile_Cream_01",
+  "src": "Materials_P03",
+  "category": "Architecture",
+  "size": [
+   136,
+   136,
+   5
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center",
+  "tris": 1500,
+  "collision": "none",
+  "rot_x": -90
+ },
+ {
+  "name": "SM_LM_FloorTile_Black_01",
+  "src": "Materials_P05",
+  "category": "Architecture",
+  "size": [
+   136,
+   136,
+   5
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center",
+  "tris": 1500,
+  "collision": "none",
+  "rot_x": -90
+ },
+ {
+  "name": "SM_LM_FloorTile_Lattice_01",
+  "src": "Materials_P08",
+  "category": "Architecture",
+  "size": [
+   136,
+   272,
+   5
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center",
+  "tris": 1500,
+  "collision": "none",
+  "rot_x": -90
+ },
+ {
+  "name": "SM_LM_Rug_Leaf_01",
+  "src": "Materials_P09",
+  "category": "Props",
+  "size": [
+   748,
+   680,
+   3
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center",
+  "tris": 12000,
+  "collision": "none",
+  "rot_x": -90
+ },
+ {
+  "name": "SM_LM_Trim_Diamond_01",
+  "src": "Materials_P01",
+  "category": "Architecture",
+  "size": [
+   272,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center_back",
+  "tris": 4000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_WallPanel_Carved_01",
+  "src": "Materials_P04",
+  "category": "Architecture",
+  "size": [
+   null,
+   null,
+   300
+  ],
+  "fit": "height",
+  "pivot": "bottom_center_back",
+  "tris": 20000,
+  "collision": "none"
+ }
+]
