@@ -115,16 +115,41 @@ for e in entries:
     tris0 = sum(len(p.vertices) - 2 for p in ob.data.polygons)
 
     # keep only part of a piece (two items fused on the sheet): face-centroid x fraction range
-    if e.get("keep_x"):
+    for key, axis in (("keep_x", 0), ("keep_z", 2)):
+        if not e.get(key):
+            continue
         import bmesh as _bm
         bm = _bm.new(); bm.from_mesh(ob.data)
-        xs = [v.co.x for v in bm.verts]; x0, x1 = min(xs), max(xs)
-        lo, hi = e["keep_x"]
-        kill = [f for f in bm.faces if not (lo <= (f.calc_center_median().x - x0) / (x1 - x0) <= hi)]
+        xs = [v.co[axis] for v in bm.verts]; x0, x1 = min(xs), max(xs)
+        lo, hi = e[key]
+        kill = [f for f in bm.faces if not (lo <= (f.calc_center_median()[axis] - x0) / (x1 - x0) <= hi)]
         _bm.ops.delete(bm, geom=kill, context="FACES")
         loose = [v for v in bm.verts if not v.link_faces]
         _bm.ops.delete(bm, geom=loose, context="VERTS")
         bm.to_mesh(ob.data); bm.free(); ob.data.update()
+    # drop small loose fragments near the floor (e.g. extra heads lying in front of a statue)
+    if e.get("drop_low_small"):
+        from scipy.sparse import coo_matrix
+        from scipy.sparse.csgraph import connected_components
+        min_tris, zf = e["drop_low_small"]
+        me = ob.data
+        nv = len(me.vertices)
+        co = np.empty(nv * 3, np.float32); me.vertices.foreach_get("co", co); co = co.reshape(-1, 3)
+        lv = np.empty(len(me.loops), np.int32); me.loops.foreach_get("vertex_index", lv); tri = lv.reshape(-1, 3)
+        ed = np.concatenate([tri[:, [0, 1]], tri[:, [1, 2]]])
+        _, lab = connected_components(coo_matrix((np.ones(len(ed), np.int8), (ed[:, 0], ed[:, 1])), shape=(nv, nv)), directed=False)
+        flab = lab[tri[:, 0]]
+        cnt = np.bincount(flab)
+        zc = np.bincount(flab, weights=co[tri[:, 0], 2]) / np.maximum(cnt, 1)
+        zmin, zmax = co[:, 2].min(), co[:, 2].max()
+        bad = set(np.where((cnt < min_tris) & (zc < zmin + zf * (zmax - zmin)))[0].tolist())
+        import bmesh as _bm
+        bm = _bm.new(); bm.from_mesh(me); bm.faces.ensure_lookup_table()
+        kill = [bm.faces[i] for i in range(len(bm.faces)) if flab[i] in bad]
+        _bm.ops.delete(bm, geom=kill, context="FACES")
+        _bm.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+        bm.to_mesh(me); bm.free(); me.update()
+        print("dropped", len(kill), "fragment faces")
     # lay flat panels (rugs, tiles): front (-Y) turns to face up
     if e.get("rot_x"):
         transform(ob, Matrix.Rotation(math.radians(e["rot_x"]), 4, "X"))

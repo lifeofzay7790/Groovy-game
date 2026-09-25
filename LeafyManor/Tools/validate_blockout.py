@@ -56,10 +56,13 @@ class Solid:
         if self.shape == "box":
             self.axes = _box_axes(p.rot)
             ex = [sum(abs(self.axes[a][i]) * self.h[a] for a in range(3)) for i in range(3)]
-        else:  # cylinders are always upright
-            if any(abs(r) > 1e-9 for r in p.rot):
-                raise ValueError("rotated cylinder %s not supported" % p.label)
+        else:  # cylinders are upright; yaw only matters for elliptical ones (use the larger radius)
+            if abs(p.rot[0]) > 1e-9 or abs(p.rot[2]) > 1e-9:
+                raise ValueError("tilted cylinder %s not supported" % p.label)
             self.axes = None
+            if abs(p.rot[1]) > 1e-9:
+                r = max(self.h[0], self.h[1])
+                self.h = (r, r, self.h[2])
             ex = list(self.h)
         self.bounds = tuple((self.c[i] - ex[i], self.c[i] + ex[i]) for i in range(3))
 
@@ -365,11 +368,11 @@ def main(argv=None):
         if p.collision != "none" and abs(p.rot[0]) > a.walkable_angle:
             errors.append("%s pitch %.1f deg is not walkable" % (p.label, p.rot[0]))
     clear = {
-        "front door width": 2 * lm.FRONT_DOOR_HW * S,
-        "front door height": lm.FRONT_DOOR_H * S,
+        "front arch width": 2 * lm.ARCH_HW * S,
+        "front arch height": lm.ARCH_H * S,
         "headroom under galleries": (lm.Z_GALLERY - lm.GALLERY_SLAB) * S,
-        "gallery walkway (minus rail)": (lm.GAL_D - lm.RAIL_T) * S,
-        "grand stair width": lm.GAL_D * S - lm.RAIL_T * S,
+        "gallery walkway (minus rail)": (lm.GAL_D - lm.RAIL_D) * S,
+        "grand stair width": lm.STAIR_W * S - 2 * 20 * S,
     }
     for k, v in clear.items():
         need = 2 * a.half_height if ("height" in k or "headroom" in k) else 2 * a.radius

@@ -19,13 +19,10 @@ simple collision, and exported one FBX per model into `LeafyManor/Models/`. Ever
   * `T_LM_StairCarpet_BaseColor.png`, `T_LM_Marble_Cream_BaseColor.png`, `T_LM_Marble_Black_BaseColor.png`: flat captures for the stairs/floor materials
 * **Nanite**: enable it on import for architecture, the fountain and statues. Polycounts are already reduced (1.5k–80k triangles per model), so it also works without Nanite.
 
-## Still missing (not in your sheets)
-Knight armour, lion statue, crowned dog statue (`CrownOrnament_01` stands in), chandelier, fireplace
-(built from `WallPanel_Carved_01` + `Fire_01` + blockout for now), grandfather clock, bust.
-The staircase steps in `Stairs.fbx` deform badly when stretched to real tread size, so the grand stairs will be built
-as a clean mesh using your carpet and marble textures.
+## Still missing
+Nothing from the original list. (The ornamental-statues upload added knights, lions, dogs, busts, clocks, fireplaces and the chandelier.)
 
-## Models (73)
+## Models (88)
 
 | Model | Folder | Used for | Size W × D × H (cm) | Triangles | Collision | Source (your file, piece) |
 |---|---|---|---|---|---|---|
@@ -34,8 +31,8 @@ as a clean mesh using your carpet and marble textures.
 | `SM_LM_Wall_DoorDouble_01` | Architecture | Vestibule inner doors (closed) | 272 × 55 × 514 | 40k | box | door+set.fbx P05 |
 | `SM_LM_Wall_Arch_01` | Architecture | Front entrance (open arch, 141 cm wide walk-through) | 272 × 55 × 514 | 40k | 3 boxes | door+set.fbx P06 |
 | `SM_LM_Wall_Window_01` | Architecture | Upper-story window bays | 272 × 55 × 514 | 40k | box | door+set.fbx P07 |
-| `SM_LM_Column_Ornate_01` | Architecture | Gallery columns | 84.8 × 89.8 × 364 | 15k | box | door+set.fbx P02 |
-| `SM_LM_Column_Plain_01` | Architecture | Gallery columns | 85 × 89.7 × 364 | 12k | box | door+set.fbx P03 |
+| `SM_LM_Column_Ornate_01` | Architecture | Gallery / vestibule columns | 80 × 80 × 487 | 15k | box | door+set.fbx P02 |
+| `SM_LM_Column_Plain_01` | Architecture | Gallery + corner columns | 80 × 80 × 487 | 12k | box | door+set.fbx P03 |
 | `SM_LM_Cornice_01` | Architecture | Top of walls under the ceiling | 272 × 46.2 × 45 | 15k | none | door+set.fbx P09 |
 | `SM_LM_Trim_Band_01` | Architecture | Gallery edge / base band | 272 × 37 × 32.6 | 6k | none | door+set.fbx P10 |
 | `SM_LM_Balustrade_01` | Architecture | Gallery, entry and porch railings | 136 × 29.9 × 61 | 20k | box | Stairs.fbx P04 |
@@ -102,5 +99,20 @@ as a clean mesh using your carpet and marble textures.
 | `SM_LM_Rug_Leaf_01` | Props | Grand leaf rug | 747.9 × 679.9 × 3 | 12k | none | Materials.fbx P09 |
 | `SM_LM_Trim_Diamond_01` | Architecture | Floor/wall border | 272 × 26.9 × 37.8 | 4k | none | Materials.fbx P01 |
 | `SM_LM_WallPanel_Carved_01` | Architecture | Fireplace surround / wall feature | 187 × 71.8 × 300 | 20k | none | Materials.fbx P04 |
+| `SM_LM_KnightArmor_01` | Props | Knights by the doors and on the galleries | 51 × 43.7 × 160 | 25k | box | ornamental statues (tripo_convert_1818e40b…) P01a |
+| `SM_LM_Fireplace_01` | Props | Lounge fireplaces | 381 × 79.9 × 348 | 33k | box | ornamental statues (tripo_convert_1818e40b…) P02a |
+| `SM_LM_Fireplace_Tall_01` | Props | Alternative fireplace | 220 × 90 × 443 | 30k | box | ornamental statues (tripo_convert_1818e40b…) P02b |
+| `SM_LM_LionStatue_01` | Props | Crowned lions flanking the fountain | 85.6 × 87.5 × 170 | 40k | box | ornamental statues (tripo_convert_1818e40b…) P03b |
+| `SM_LM_GrandfatherClock_01` | Furniture | Under the east gallery | 43.7 × 30.1 × 180 | 15k | box | ornamental statues (tripo_convert_1818e40b…) P04 |
+| `SM_LM_Clock_Ornate_01` | Furniture | Under the east gallery | 52.4 × 19.6 × 170 | 15k | box | ornamental statues (tripo_convert_1818e40b…) P05d |
+| `SM_LM_Bust_01` | Props | North gallery | 64.5 × 44.5 × 150 | 20k | box | ornamental statues (tripo_convert_1818e40b…) P05f |
+| `SM_LM_Bust_02` | Props | North gallery | 43.2 × 53.1 × 150 | 20k | box | ornamental statues (tripo_convert_1818e40b…) P05g |
+| `SM_LM_DogStatue_01` | Props | Flanking the vestibule opening | 56.4 × 59.9 × 150 | 9k | box | ornamental statues (tripo_convert_1818e40b…) P06a |
+| `SM_LM_DogStatue_02` | Props | Flanking the vestibule opening | 50.1 × 57.7 × 150 | 9k | box | ornamental statues (tripo_convert_1818e40b…) P06a |
+| `SM_LM_Chandelier_01` | Props | Hall + vestibule chandeliers | 249.9 × 194.5 × 249.8 | 40k | none | ornamental statues (tripo_convert_1818e40b…) P06c |
+| `SM_LM_WallSconce_Bowl_01` | Props | Wall sconces | 27.6 × 26.5 × 60 | 10k | none | ornamental statues (tripo_convert_1818e40b…) P06d |
+| `SM_LM_Stair_Grand_01` | Architecture | Both diagonal grand staircases (41 treads, 12.2 cm risers) | 836 × 238 × 514 | <1k | none (ramp + blockers in level) | built by `build_stairs.py` |
+| `SM_LM_StairBalustrade_01` | Architecture | Stair railings (your balusters + marble handrail) | 846 × 19 × 575 | 62k | none | built from `SM_LM_Baluster_01` |
+| `SM_LM_Runner_01` | Architecture | Blue/gold carpet runner tile (165 cm) | 165 × 143 × 0 | <1k | none | your carpet texture |
 
 Per-sheet piece numbers are shown in `Docs/Models/Sheet_<name>.png`.

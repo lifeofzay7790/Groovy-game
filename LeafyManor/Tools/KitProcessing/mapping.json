@@ -99,11 +99,11 @@
   "src": "door_set_P02",
   "category": "Architecture",
   "size": [
-   null,
-   null,
-   364
+   80,
+   80,
+   487
   ],
-  "fit": "height",
+  "fit": "exact",
   "pivot": "bottom_center",
   "tris": 15000,
   "collision": "box"
@@ -113,11 +113,11 @@
   "src": "door_set_P03",
   "category": "Architecture",
   "size": [
-   null,
-   null,
-   364
+   80,
+   80,
+   487
   ],
-  "fit": "height",
+  "fit": "exact",
   "pivot": "bottom_center",
   "tris": 12000,
   "collision": "box"
@@ -1066,6 +1066,196 @@
   "fit": "height",
   "pivot": "bottom_center_back",
   "tris": 20000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_KnightArmor_01",
+  "src": "Statues_P01a",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   160
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 25000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Fireplace_01",
+  "src": "Statues_P02a",
+  "category": "Props",
+  "size": [
+   381,
+   80,
+   348
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center_back",
+  "tris": 40000,
+  "collision": "box",
+  "keep_x": [
+   0.0,
+   0.79
+  ]
+ },
+ {
+  "name": "SM_LM_Fireplace_Tall_01",
+  "src": "Statues_P02b",
+  "category": "Props",
+  "size": [
+   220,
+   90,
+   443
+  ],
+  "fit": "exact",
+  "pivot": "bottom_center_back",
+  "tris": 30000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_LionStatue_01",
+  "src": "Statues_P03b",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   170
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 40000,
+  "collision": "box",
+  "rot_z": 90
+ },
+ {
+  "name": "SM_LM_GrandfatherClock_01",
+  "src": "Statues_P04",
+  "category": "Furniture",
+  "size": [
+   null,
+   null,
+   180
+  ],
+  "fit": "height",
+  "pivot": "bottom_center_back",
+  "tris": 15000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Clock_Ornate_01",
+  "src": "Statues_P05d",
+  "category": "Furniture",
+  "size": [
+   null,
+   null,
+   170
+  ],
+  "fit": "height",
+  "pivot": "bottom_center_back",
+  "tris": 15000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Bust_01",
+  "src": "Statues_P05f",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   150
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 20000,
+  "collision": "box"
+ },
+ {
+  "name": "SM_LM_Bust_02",
+  "src": "Statues_P05g",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   150
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 20000,
+  "collision": "box",
+  "rot_z": 90
+ },
+ {
+  "name": "SM_LM_DogStatue_01",
+  "src": "Statues_P06a",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   150
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 25000,
+  "collision": "box",
+  "keep_x": [
+   0.0,
+   0.5
+  ],
+  "keep_z": [
+   0.222,
+   1.0
+  ]
+ },
+ {
+  "name": "SM_LM_DogStatue_02",
+  "src": "Statues_P06a",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   150
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 25000,
+  "collision": "box",
+  "keep_x": [
+   0.5,
+   1.0
+  ],
+  "keep_z": [
+   0.222,
+   1.0
+  ]
+ },
+ {
+  "name": "SM_LM_Chandelier_01",
+  "src": "Statues_P06c",
+  "category": "Props",
+  "size": [
+   250,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "top_center",
+  "tris": 40000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_WallSconce_Bowl_01",
+  "src": "Statues_P06d",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   60
+  ],
+  "fit": "height",
+  "pivot": "back_center",
+  "tris": 10000,
   "collision": "none"
  }
 ]

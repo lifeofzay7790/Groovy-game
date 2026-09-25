@@ -13,49 +13,32 @@ Axes: **+X = North** (exterior front doors), **+Y = East**, **+Z = Up**. Origin 
 | Master sheet, *Details / Materials* | Fountain, door, banner, lion, chandelier and fireplace close-ups. Materials: black and cream marble with gold veins, gold inlay, dark stone walls, dark wood, gold trim, royal-blue fabric, purple velvet, foliage, glowing water, candle flame. |
 | Pixel-art hero view | Camera from the south looking north: open doors to the night garden at the far end; fireplace lounge NW with the *Sticky* portrait; grand staircase NE along the east wall; chess / armchairs / orb desk to the east; big leaf rug; fountain flanked by crowned dog statues and planters; **the hall floor is a raised platform with balustrades, and central steps lead down to a lower entry landing** ("SAME SPOT. DIFFERENT WORLD." rug). |
 
-### Where the references disagree (decisions I made; each is easy to change)
-1. **Front doors on the north wall.** Both hero views look at open exterior doors across the room. The player spawns in the **sunken south vestibule facing north**, so the first thing they see is the hero composition. The floor plan's "player spawn" arrow in the north corridor contradicts its own "ENTRANCE" arrow at the south. Moving the spawn means moving one actor (`PlayerStart_LM_Vestibule`).
-2. **Stairs are straight flights along the side walls**, rising north to the galleries, as in both hero views. The floor plan draws them diagonally in the NW/NE corners. Straight flights are more reliable for the collision ramp and easier to model.
-3. **Two fireplaces (W and E)** for the requested symmetry. The east lounge gets the chess table and the orb desk from the pixel-art view.
-4. **U-shaped gallery** (west + north + east) at 392 cm, connecting both staircases above the front doors.
-5. **Sunken vestibule** (−65 cm, 6 steps) from the pixel-art view, with stone cheek walls, balustrade and crowned dog statues on the pillars.
+### Layout decisions (v2, after your floor-plan diorama)
+Your diorama (`Reference/FloorPlan_Diorama_TopView.png`, turned 45° square) is the plan of record:
+1. **Fountain in the centre.** It's ringed by planters and two crowned lions, with the carpet runner on the north–south axis.
+2. **Two 45° grand staircases** rise from beside the fountain to landings in the NW / NE corners of a U-shaped balcony (west, north and east sides).
+3. **Lounges in the middle of the west and east walls.** Each has a fireplace, sofas, table, chair and rug.
+4. **Props in the south corners:** globe and chest on one side, chess table and chairs on the other. The vestibule and spawn are to the south.
+5. **Front arch in the middle of the north wall.** It opens onto a porch and the night garden (castle backdrop, moon, exterior fountain).
+6. **One story = 514 cm**, the height of one of your wall kit sections. The balcony floor is at 514 cm and the ceiling at 1074 cm (two stories + cornice). Steps are 12.2 cm high × 20.4 cm deep (31°).
+7. The sunken entry of the first blockout was dropped because the diorama shows a level entrance.
 
-## 2. Scale: fitting the hall to your character
+## 2. Scale
 
 | Item | Value |
 |---|---|
-| Character mesh (both FBX variants) | **97.8 cm** tall, T-pose span 89–96 cm, depth about 41 cm; UE5 Mannequin bone names; exported from Blender (FBX Units Scale) |
-| Assumed capsule | radius 28, half-height 50 (edit `PLAYER` in the layout file if yours differs) |
-| `LM_SCALE` | 97.8 / 180 × 1.25 (grandeur) = **0.68** |
-| Stair riser / tread | 10.9 / 20.4 cm (28°); entry steps 10.9 / 27.2 cm (22°) |
-| Railing height | 61 cm (about chest height; the character sees over it) |
-| Doors | grand 272 × 354, side 136 × 245 |
-| Clear widths | stairs 224, galleries 224, lounge aisles ≥ 88 cm (≥ 3× the capsule diameter; still passes with the UE template capsule r42/hh96) |
-| Headroom | under the galleries 364 cm, ceiling 1088 cm |
+| Character mesh | **97.8 cm** tall (both FBX variants), UE5 Mannequin bone names |
+| Assumed capsule | radius 28, half-height 50 (edit `PLAYER` in `leafy_manor_layout.py`) |
+| `LM_SCALE` | 97.8 / 180 × 1.25 = **0.68** (design units → cm) |
+| Hall | 24.5 × 24.5 m (9 × 9 wall sections of 272 cm), 10.7 m to the ceiling |
+| Stairs | 41 treads, 12.2 cm risers, 20.4 cm treads, 238 cm wide, 31° |
+| Balcony | 514 cm up, 238 cm deep, railing 61 cm |
+| Front arch | 141 cm wide × 355 cm to the spring of the arch |
 
 ## 3. Plan
 
-```
-                           N (+X)
-                   ┌──── PORCH (x 1265..1768) ────┐   exterior night garden beyond, visual only
-                   │   leaves open ║   ║          │   invisible walls around the porch
-  x 1224 ┌─────────┴─────────── FRONT DOORS 272 ──┴────────────┐
-         │ bookcase   N GALLERY z392 (x 986..1224) over doors   │ clock/desk
-         │ door  W GALLERY z392      knights       E GALLERY    │ door
-  x  544 │ bookcase  (y ±714..±952)  runner                     │
-         │ ▲ W STAIR                 GRAND RUG                ▲ │ E STAIR
-         │ ▲ (x -170..544)          (x -41..707)              ▲ │ (36 × 10.9 cm)
-  x -170 │ ▲                                                  ▲ │
-         │ FIREPLACE W ─ lounge   lion ◯ FOUNTAIN ◯ lion  lounge ─ FIREPLACE E
-         │ (x -714..-374)         planters (x -340)             │
-  x -952 └────────── balustrade ═ STEPS ═ balustrade ──────────┘
-                     │  VESTIBULE z -65  (x -1496..-952)   │
-                     │  ★ PlayerStart facing north         │
-  x -1496            └──────── inner grand doors (closed) ─┘
-                               S
-```
-
-Hall interior 2176 (N–S) × 1904 (E–W) × 1088 cm. Vestibule 544 × 816. Porch 503 × 680.
+See `Validation/walkability_map.png` (north up; left = ground level, right = balcony level) and
+`Preview/room_high.png`.
 
 ## 4. Collision rules used
 
@@ -76,8 +59,8 @@ All movable, so Lumen needs no lighting build. Warm chandelier lights ×3, firep
 
 ## 6. Outliner / content organisation
 
-* Level: `/Game/LeafyManor/Maps/LVL_LM_EntranceHall_Blockout`
+* Level: `/Game/LeafyManor/Maps/LVL_LM_EntranceHall`
 * Blockout meshes: `/Game/LeafyManor/Architecture/Blockout/SM_LM_BO_{Cube,Cylinder,Cone,Sphere}`
 * Materials: `/Game/LeafyManor/Materials/Blockout/M_LM_Blockout` (1 m world-space checker, tinted per material) + `MI_LM_BO_*`, and `M_LM_BO_Collision`
-* Outliner folders: `LeafyManor_Blockout/{Architecture/*, Collision/Blockers, Props/*, Furniture/*, Exterior, Lighting, Gameplay}`
+* Outliner folders: `LeafyManor/{Architecture/*, Collision/*, Props/*, Furniture/*, Exterior, Lighting, Gameplay}`
 * Every generated actor is tagged `LM_Blockout` + `LM_Kind_<Kind>`. `LM_Kind_*` is what the later "swap proxy → Blender mesh" step keys on.

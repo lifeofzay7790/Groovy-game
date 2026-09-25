@@ -1,91 +1,109 @@
-# Leafy Manor Entrance Hall: playable blockout
+# Leafy Manor Entrance Hall
 
-Script-generated blockout of the Leafy Manor entrance hall for Unreal Engine 5, built from the reference sheets in `Docs/Reference/` and scaled to your player character (97.8 cm tall, measured from your FBX). The same layout data drives the Unreal build script and an offline walkability validator, so what gets validated is exactly what gets built.
+The Leafy Manor entrance hall for Unreal Engine 5, built by a script from:
+- the reference sheets in `Docs/Reference/`
+- your floor-plan diorama
+- your model kit (88 game-ready models split from your Tripo sheets)
 
-| Hero view from the vestibule (character FBX placed for scale) | Pixel-art composition check |
+It's scaled to your player character (97.8 cm, measured from your FBX). The same layout data drives the Unreal build script and an offline walkability validator, so what's validated is exactly what gets built.
+
+| Entry view (character placed for scale) | Overview |
 |---|---|
-| ![](Docs/Preview/preview_entry_view.png) | ![](Docs/Preview/preview_hero_high.png) |
+| ![](Docs/Preview/room_entry.png) | ![](Docs/Preview/room_high.png) |
+| ![](Docs/Preview/room_stairs.png) | ![](Docs/Preview/room_gallery.png) |
 
-These previews come from a three.js render of the layout data, not from Unreal, and use flat blockout colours.
+These previews are browser (three.js) renders of the exact layout and models. They are not Unreal screenshots, and the lighting in Unreal will differ.
 
-## Build it in Unreal (about 1 minute)
+## Build it in Unreal
 
-1. **Edit → Plugins**: enable **Python Editor Script Plugin** and **Editor Scripting Utilities**, then restart if asked.
-2. Put the two files from `Unreal/Python/` next to each other anywhere on disk. `<YourProject>/Content/Python/` is the conventional place.
-3. **Tools → Execute Python Script…** → `leafy_manor_build_blockout.py`.
-4. The standard *Save changes?* dialog appears first; cancelling aborts without touching anything. The script then creates `/Game/LeafyManor/…` and opens `/Game/LeafyManor/Maps/LVL_LM_EntranceHall_Blockout`.
-5. Press **Play**. Your project's default GameMode spawns **your existing character** at `PlayerStart_LM_Vestibule`, facing the hall.
-   * If a different pawn spawns, set **World Settings → GameMode Override** to your GameMode. This changes only this level.
+1. **Edit → Plugins**: enable **Python Editor Script Plugin** and **Editor Scripting Utilities**.
+2. Clone or pull this repo; the script reads models from `LeafyManor/Models`. If you copy the Python files elsewhere, set `MODELS_DIR` at the top of `leafy_manor_build.py`.
+3. **Tools → Execute Python Script…** → `LeafyManor/Unreal/Python/leafy_manor_build.py`.
+   * The first run imports 88 models and 34 textures and builds the materials. This takes a few minutes, longer while Nanite builds.
+   * The standard *Save changes?* dialog appears first; Cancel aborts without changing anything.
+4. Open `/Game/LeafyManor/Maps/LVL_LM_EntranceHall` and press **Play**. Your project's default GameMode spawns your character in the vestibule, facing the hall.
+   * If a different pawn spawns, set **World Settings → GameMode Override** to your GameMode. This affects only this level.
 
-Re-running the script is safe: it deletes only actors tagged `LM_Blockout` and rebuilds them. Existing assets are reused. Set `REBUILD_MATERIALS = True` in the script to regenerate the blockout materials.
+Re-running is safe: the script only replaces actors it created (tag `LM_Blockout`) and skips assets that already exist. Settings at the top of the script:
 
-The script does **not** create or modify any character, controller, camera, GameMode or project setting, and it writes only inside `/Game/LeafyManor/`.
+| Setting | Default | Effect |
+|---|---|---|
+| `DRESSED` | `True` | `False` builds the grey blockout only, with no import |
+| `REIMPORT_MODELS` | `False` | `True` re-imports every model and texture |
+| `REBUILD_MATERIALS` | `False` | `True` rebuilds the generated materials |
+| `ENABLE_NANITE` | `True` | Turns Nanite on for the kit meshes |
+| `SCONCE_LIGHTS` | `True` | Adds a small warm light at every wall sconce |
 
-## Play-test checklist (with your character)
+The script writes only inside `/Game/LeafyManor/`. It never touches your character, controller, camera, GameMode or project settings.
 
-`TP_LM_Test_*` target points (Outliner → `LeafyManor_Blockout/Gameplay/TestPoints`) mark every spot below. Press **P** in the editor viewport to show the NavMesh; green = walkable.
+## Layout (follows your floor plan)
 
-- [ ] Spawn in the vestibule, walk up the 6 entry steps to the main floor
-- [ ] Circle the fountain on its low plinth; you can't enter the water or jump onto it
-- [ ] Walk between the lions, planters and lounge furniture without snagging; you can't step up onto sofas or tables
-- [ ] Walk **up the west stairs**, along the west gallery → north gallery (over the doors) → east gallery, and **down the east stairs**
-- [ ] Try to jump off the galleries or the sides of the stairs (invisible walls should stop you; the camera should not pop)
-- [ ] Walk under the galleries (bookshelves, side doors, clock/desk)
-- [ ] Go out the front doors onto the porch; invisible walls keep you there, and the night garden is visible
-- [ ] Watch the camera under the galleries (364 cm headroom) and near walls
+* **Size:** 24.5 m square hall with two-storey walls (514 cm each) built from your wall kit, cornice, arched windows and a marble checker floor.
+* **Centre:** crowned fountain, ringed by planters with two crowned lions.
+* **North–south axis:** blue/gold carpet runner, leaf rug and crown rug. The front arch opens to a porch with the night garden, castle backdrop and moon.
+* **Stairs:** two 45° grand staircases (41 steps, 12.2 cm risers, your balusters) rise from beside the fountain to landings on the U-shaped balcony (NW and NE corners).
+* **Lounges:** in the middle of the west and east walls, each with a fireplace, two sofas, table, chair and rug.
+* **South-west corner:** globe, treasure chest and plants.
+* **South-east corner:** chess table and chairs.
+* **Entrance:** crowned dogs flank the vestibule opening, and the vestibule is where you spawn.
+* **Dressing:** knights, busts, bookcases, clocks, banners, ivy, chandeliers and sconces.
 
-Tell me the result of anything that fails, plus your capsule radius / half-height / MaxStepHeight / camera arm length, and I'll adjust.
+Collision:
+* **Walls and stairs:** hidden simple-collision stand-ins, plus a smooth invisible ramp on each stair.
+* **Balconies and stair sides:** invisible walls up to the ceiling. They're ignored by the camera, so it doesn't pop.
+* **Models:** each keeps its UCX box, and furniture can't be stepped onto.
+* **Decoration:** rugs, banners and similar pieces have no collision.
 
-## Offline validation
+## Checks
 
 ```bash
-python3 Tools/validate_blockout.py                               # your character's capsule (assumed r28 / hh50)
-python3 Tools/validate_blockout.py --radius 42 --half-height 96   # UE template capsule
+python3 LeafyManor/Tools/validate_blockout.py                               # your character's capsule (assumed r28 / hh50)
+python3 LeafyManor/Tools/validate_blockout.py --radius 42 --half-height 96   # UE template capsule
 ```
 
-Recast-style walkability check on the exact spawned geometry. It covers capsule-radius clearance, headroom, MaxStepHeight step-ups, "can't step up on" props, ledges/falls, and reachability of all 29 test points from the PlayerStart. It also checks stair riser and slope against CharacterMovement limits, and door and walkway widths.
+**Current result: PASS for both capsules** (0 errors, 0 warnings).
+* 605 m² is walkable and reachable from the PlayerStart.
+* All 25 test points are reachable on foot: both stairs, every balcony, behind the stairs, the lounges, the porch.
+* There are no drops into the void and no dead-end pockets.
 
-**Current result: PASS for both capsules (0 errors, 0 warnings).** It found 463 m² walkable and reachable, all 29 test points reachable, and no fall into the void or into a pocket you can't walk out of. Report: `Docs/Validation/validation_report.txt`.
+Reports and maps are in `Docs/Validation/`. The Unreal script has also been run against a mocked `unreal` module to check its own logic; the real engine run is still to do.
 
-Map (`Docs/Validation/walkability_map.png`, north up, left = ground level, right = upper level):
-green = reachable ground, teal = vestibule, green→blue = stairs/galleries by height, orange = standable but unreachable (tops of props), grey = solid, red = ledge, white = test point.
+## Play-test checklist
 
-## Changing scale or character metrics
+`TP_LM_Test_*` markers (Outliner → `LeafyManor/Gameplay/TestPoints`) mark every spot. Press **P** in the viewport to show the NavMesh.
 
-Everything lives at the top of `Unreal/Python/leafy_manor_layout.py`:
-
-```python
-PLAYER = {"mesh_height_cm": 97.8, "capsule_radius_cm": 28.0, "capsule_half_height_cm": 50.0,
-          "max_step_height_cm": 45.0, "walkable_floor_angle_deg": 44.765}
-GRANDEUR = 1.25          # 1.0 = "real" proportions around the character, higher = grander
-LM_SCALE = ...           # derived: height / 180 * GRANDEUR  (0.68)
-```
-
-After changing it, run the validator, then re-run the build script.
+- [ ] Walk from the vestibule round the fountain, between the lions and planters
+- [ ] Walk up a diagonal staircase, round the whole balcony, and down the other staircase
+- [ ] Try to jump off the balcony or the side of a stair (invisible walls should stop you)
+- [ ] Walk through both lounges and the south corners without snagging on furniture
+- [ ] Walk under the balconies, including behind the staircases
+- [ ] Go out through the front arch onto the porch
 
 ## Files
 
 ```
 LeafyManor/
-  Unreal/Python/leafy_manor_layout.py          layout data (no Unreal import) – single source of truth
-  Unreal/Python/leafy_manor_build_blockout.py  run inside Unreal Editor
-  Tools/validate_blockout.py                   offline walkability validator (pure Python 3)
-  Docs/BlockoutSpec.md                         reference analysis, decisions, plan, dimensions, collision rules
-  Docs/BlenderModelRequests.md                 every Blender model needed, in the requested spec format
-  Docs/Validation/                             validator reports + walkability maps
-  Docs/Preview/                                layout preview renders (character FBX for scale)
-  Docs/Reference/                              the two reference images
+  Unreal/Python/leafy_manor_build.py    run inside Unreal Editor
+  Unreal/Python/leafy_manor_layout.py   the hall layout (single source of truth)
+  Unreal/Python/leafy_manor_kit.py      model sizes / pivots / collision (generated)
+  Models/{Architecture,Props,Furniture} 88 FBX models with UCX collision
+  Models/Textures/                      4K BaseColor / Normal (DirectX) / ORM per kit sheet + floor/stair textures
+  Tools/validate_blockout.py            offline walkability validator (pure Python 3)
+  Tools/KitProcessing/                  Blender scripts that split/scale/export your sheets + build the stairs
+  Docs/ModelKit.md                      every model: size, use, source piece
+  Docs/BlockoutSpec.md                  reference analysis, layout decisions, collision rules
+  Docs/BlenderModelRequests.md          the original model specs
+  Docs/Preview, Docs/Validation, Docs/Models, Docs/Reference
 ```
 
 ## Status
 
 | Step | State |
 |---|---|
-| 1 Analyse references | Done – `Docs/BlockoutSpec.md` |
-| 2 Blockout | Done – 307 modular pieces (walls in 272 cm bays, floors, stairs, galleries, columns, doors, fountain, fireplaces, furniture proxies, rugs, banners, windows, chandeliers, exterior) |
-| 3 Player scale | Done – fitted to the 97.8 cm character; capsule values are assumed until you confirm them |
-| 4 Main architecture | Done (blockout level) |
-| 5 Collision | Done – simple collision everywhere, stair ramps, invisible safety walls, no-step-up furniture |
-| 6 Walk test | Offline validator passes. **Still needs your in-editor play test** (Unreal can't run in this environment) |
-| 7–10 Final meshes, materials, props, decoration | Waiting on the Blender models in `Docs/BlenderModelRequests.md` |
-| 11–14 Lighting, fountain FX, optimisation, final test | Not started (work lights only) |
+| 1–6 Analysis, blockout, scale, architecture, collision, walk test | Done; offline validator passes. Your in-editor play test is still needed |
+| 7 Replace blockout with real models | Done: 88 models from your sheets + a procedural staircase |
+| 8 Materials | Done: kit materials from your textures, marble checker floor, stair marble and carpet |
+| 9–10 Furniture, props, plants, decoration | Done (first pass) |
+| 11 Lighting | Work lights only: chandeliers, fireplaces, fountain, sconces, moon. The full mood pass is next |
+| 12 Fountain water and FX | Not started (Niagara water, fire, candle flicker) |
+| 13–14 Optimisation, final test | Nanite on; profiling needs your in-editor run |
