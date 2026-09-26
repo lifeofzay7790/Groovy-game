@@ -14,6 +14,14 @@ It's scaled to your player character (97.8 cm, measured from your FBX). The same
 
 These previews are browser (three.js) renders of the exact layout and models. They are not Unreal screenshots, and the lighting in Unreal will differ.
 
+## Play it in your browser
+
+`Web/` is a browser version of the hall. You play as your character, using lighter copies of the models.
+* **Run it locally:** it must be served, because opening `index.html` directly won't load the models. Run `cd LeafyManor/Web && python3 -m http.server 8000`, then open http://localhost:8000.
+* **Controls:** WASD to move, mouse to look, Shift to run, Space to jump, the mouse wheel for camera distance and R to return to the entrance. Phones get an on-screen joystick.
+* **Collision:** it uses the same walkability data as `Tools/validate_blockout.py`.
+* **Rebuilding:** after a layout or model change, rebuild it with `Tools/WebWalkthrough/build_web.sh`. The settings are listed at the top of that script.
+
 ## Build it in Unreal
 
 1. **Edit → Plugins**: enable **Python Editor Script Plugin** and **Editor Scripting Utilities**.
@@ -90,6 +98,8 @@ LeafyManor/
   Models/Textures/                      4K BaseColor / Normal (DirectX) / ORM per kit sheet + floor/stair textures
   Tools/validate_blockout.py            offline walkability validator (pure Python 3)
   Tools/KitProcessing/                  Blender scripts that split/scale/export your sheets + build the stairs
+  Tools/WebWalkthrough/                 scripts that build the browser version in Web/
+  Web/                                  browser walkthrough (three.js): index.html + models + walk grid
   Docs/ModelKit.md                      every model: size, use, source piece
   Docs/BlockoutSpec.md                  reference analysis, layout decisions, collision rules
   Docs/BlenderModelRequests.md          the original model specs

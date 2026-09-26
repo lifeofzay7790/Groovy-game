@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Leafy Manor Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus+SC&family=Karla:wght@400;600&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --night: #0a0e1d;
+    --panel: rgba(10, 14, 29, 0.78);
+    --line: rgba(217, 172, 86, 0.35);
+    --gold: #d9ac56;
+    --cream: #f1e6cf;
+    --mist: #9ba4c4;
+    --leaf: #86b86a;
+    --display: "Marcellus SC", "Trajan Pro", Georgia, serif;
+    --body: "Karla", "Segoe UI", system-ui, sans-serif;
+  }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--night); color: var(--cream); font-family: var(--body); overflow: hidden; }
+  #view { position: fixed; inset: 0; }
+  #view canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+
+  .screen { position: fixed; inset: 0; display: grid; place-items: center; padding: 24px 16px; overflow-y: auto;
+    background: radial-gradient(ellipse at 50% 40%, rgba(10, 14, 29, 0.35), rgba(10, 14, 29, 0.92) 70%); z-index: 5; }
+  .card { width: min(440px, 100%); display: grid; gap: 18px; text-align: center; }
+  .crest { font-family: var(--display); color: var(--gold); letter-spacing: 0.32em; font-size: 12px; text-transform: uppercase; }
+  h1 { font-family: var(--display); font-weight: 400; font-size: clamp(34px, 8vw, 52px); line-height: 1.02; margin: 0;
+    letter-spacing: 0.04em; text-wrap: balance; color: var(--cream); }
+  .sub { color: var(--mist); font-size: 15px; line-height: 1.5; margin: 0; text-wrap: balance; }
+  .track { height: 3px; background: rgba(155, 164, 196, 0.2); overflow: hidden; }
+  #bar { height: 100%; background: var(--gold); transform-origin: left; transform: scaleX(0); transition: transform 0.2s; }
+  .meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--mist); font-variant-numeric: tabular-nums; }
+  .btn { font: 600 15px/1 var(--body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--night);
+    background: var(--gold); border: 0; padding: 16px 28px; cursor: pointer; justify-self: center; }
+  .btn:hover { background: #e8c070; }
+  .btn:focus-visible { outline: 2px solid var(--cream); outline-offset: 3px; }
+  .keys { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; text-align: left; font-size: 13px;
+    color: var(--mist); border-top: 1px solid var(--line); padding-top: 18px; }
+  .keys div { display: flex; align-items: center; gap: 8px; }
+  .keys b { display: flex; gap: 3px; font-weight: 600; }
+  @media (max-width: 440px) { .keys { grid-template-columns: 1fr; } }
+  kbd { font: 600 11px/1 var(--body); min-width: 22px; padding: 5px 6px; border: 1px solid var(--line); color: var(--cream);
+    background: rgba(241, 230, 207, 0.06); text-align: center; }
+  .err { color: #f0a38a; }
+
+  #hud { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 16px); left: 16px; z-index: 3; pointer-events: none;
+    display: grid; gap: 2px; padding: 10px 14px; background: var(--panel); border-left: 2px solid var(--gold); }
+  #place { font-family: var(--display); font-size: 22px; letter-spacing: 0.06em; }
+  #level { font-size: 12px; color: var(--mist); letter-spacing: 0.14em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+  #level::before { content: ""; display: inline-block; width: 6px; height: 6px; background: var(--leaf); margin-right: 8px; vertical-align: 1px; }
+  #hint { position: fixed; left: 16px; bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); z-index: 3; pointer-events: none;
+    display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--mist); max-width: calc(100% - 32px);
+    padding: 8px 12px; background: var(--panel); }
+  #hint span { display: inline-flex; gap: 5px; align-items: center; }
+
+  #touch { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+  #stick { position: absolute; left: 24px; bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); width: 120px; height: 120px;
+    border: 1px solid var(--line); border-radius: 50%; pointer-events: auto; background: rgba(10, 14, 29, 0.35); touch-action: none; }
+  #knob { position: absolute; left: 40px; top: 40px; width: 40px; height: 40px; border-radius: 50%; background: rgba(217, 172, 86, 0.75); }
+  #jump { position: absolute; right: 24px; bottom: calc(env(safe-area-inset-bottom, 0px) + 56px); width: 72px; height: 72px;
+    border-radius: 50%; border: 1px solid var(--line); background: rgba(10, 14, 29, 0.5); color: var(--cream);
+    font: 600 12px var(--body); letter-spacing: 0.1em; text-transform: uppercase; pointer-events: auto; touch-action: none; }
+  #run { position: absolute; right: 108px; bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); width: 56px; height: 56px;
+    border-radius: 50%; border: 1px solid var(--line); background: rgba(10, 14, 29, 0.5); color: var(--cream);
+    font: 600 11px var(--body); letter-spacing: 0.1em; text-transform: uppercase; pointer-events: auto; touch-action: none; }
+  #run[aria-pressed="true"] { background: var(--gold); color: var(--night); }
+  @media (prefers-reduced-motion: reduce) { #bar { transition: none; } }
+</style>
+</head>
+<body>
+<div id="view"></div>
+
+<div id="hud" hidden><div id="place">Vestibule</div><div id="level">Ground floor</div></div>
+<div id="hint" hidden>
+  <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move</span>
+  <span><kbd>Shift</kbd> run</span>
+  <span><kbd>Space</kbd> jump</span>
+  <span><kbd>Wheel</kbd> zoom</span>
+  <span><kbd>R</kbd> back to the door</span>
+  <span><kbd>Esc</kbd> free the mouse</span>
+</div>
+<div id="touch" hidden>
+  <div id="stick"><div id="knob"></div></div>
+  <button id="run" type="button" aria-pressed="false">Run</button>
+  <button id="jump" type="button">Jump</button>
+</div>
+
+<div class="screen" id="loader">
+  <div class="card">
+    <div class="crest">Entrance hall</div>
+    <h1>Leafy Manor</h1>
+    <p class="sub" id="loadmsg">Carrying the furniture in…</p>
+    <div class="track"><div id="bar"></div></div>
+    <div class="meta"><span id="loadwhat">Models</span><span id="pct">0%</span></div>
+  </div>
+</div>
+
+<div class="screen" id="start" hidden>
+  <div class="card">
+    <div class="crest" id="startcrest">Entrance hall · 24.5 m × 24.5 m</div>
+    <h1 id="starttitle">Leafy Manor</h1>
+    <p class="sub" id="startsub">Walk the hall, climb either staircase to the balcony, and step out through the front arch to the night garden.</p>
+    <button class="btn" id="go" type="button">Enter the hall</button>
+    <div class="keys" id="keys">
+      <div><b><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></b>Move</div>
+      <div><b><kbd>Mouse</kbd></b>Look around</div>
+      <div><b><kbd>Shift</kbd></b>Run</div>
+      <div><b><kbd>Space</kbd></b>Jump</div>
+      <div><b><kbd>Wheel</kbd></b>Camera distance</div>
+      <div><b><kbd>R</kbd></b>Back to the entrance</div>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const $ = id => document.getElementById(id);
+const touchUI = matchMedia('(pointer: coarse)').matches;
+const fail = msg => { $('loader').hidden = false; $('start').hidden = true; $('loadmsg').textContent = msg; $('loadmsg').classList.add('err'); };
+
+// ---------------------------------------------------------------- renderer + scene
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: !touchUI, powerPreference: 'high-performance' });
+} catch (e) {
+  fail('Your browser could not start WebGL, so the 3D hall cannot be shown. Try a desktop browser with hardware acceleration turned on.');
+  throw e;
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio, touchUI ? 1.25 : 1.5));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.92;
+$('view').appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x05070f);
+scene.fog = new THREE.FogExp2(0x0a0e1d, 0.011);
+const camera = new THREE.PerspectiveCamera(62, 1, 0.05, 250);
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+resize();
+
+// UE centimetres (X north, Y east, Z up) -> three.js metres
+const toThree = (x, y, z, out = new THREE.Vector3()) => out.set(y / 100, z / 100, -x / 100);
+
+// ---------------------------------------------------------------- loading
+const progress = {};
+let totalBytes = 1;
+function onBytes(key, loaded) {
+  progress[key] = loaded;
+  const f = Math.min(1, Object.values(progress).reduce((a, b) => a + b, 0) / totalBytes);
+  $('bar').style.transform = `scaleX(${f})`;
+  $('pct').textContent = Math.round(f * 100) + '%';
+}
+const loader = new GLTFLoader();
+const loadGLTF = (url, key) => new Promise((res, rej) => loader.load(url, res, e => onBytes(key, e.loaded), rej));
+const loadImage = url => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+
+async function gunzip16(b64) {
+  const bin = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  const stream = new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'));
+  return new Int16Array(await new Response(stream).arrayBuffer());
+}
+const decodeGrid = g => Promise.all([gunzip16(g.b64), gunzip16(g.spans)]);
+
+let data, kitGltf, playerGltf, grid, spans, floorImgs;
+try {
+  data = await (await fetch('scene.json')).json();
+  totalBytes = data.bytes['kit.json'] + data.bytes['player.json'];
+  [kitGltf, playerGltf, [grid, spans], floorImgs] = await Promise.all([
+    loadGLTF('kit.json', 'kit'),
+    loadGLTF('player.json', 'player'),
+    decodeGrid(data.grid),
+    Promise.all([loadImage('floor_cream.jpg'), loadImage('floor_black.jpg')]),
+  ]);
+} catch (e) {
+  console.error(e);
+  fail('The hall could not be loaded. Check your connection and reload the page.');
+  throw e;
+}
+$('loadmsg').textContent = 'Lighting the candles…';
+$('loadwhat').textContent = 'Building the hall';
+
+// ---------------------------------------------------------------- kit instances
+const maxAniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+kitGltf.scene.updateMatrixWorld(true);
+const named = {};
+kitGltf.scene.traverse(o => { if (data.kit[o.name] && !named[o.name]) named[o.name] = o; });
+const tmp = new THREE.Matrix4(), q = new THREE.Quaternion(), eul = new THREE.Euler(), v3 = new THREE.Vector3(), s3 = new THREE.Vector3();
+const seenMats = new Set();
+for (const [name, list] of Object.entries(data.kit)) {
+  const node = named[name];
+  if (!node) continue;
+  const inv = node.matrixWorld.clone().invert();
+  node.traverse(o => {
+    if (!o.isMesh) return;
+    const rel = inv.clone().multiply(o.matrixWorld);
+    const m = o.material;
+    if (!seenMats.has(m)) {
+      seenMats.add(m);
+      m.metalness = 0; m.roughness = 0.62;
+      if (m.map) m.map.anisotropy = maxAniso;
+    }
+    const im = new THREE.InstancedMesh(o.geometry, m, list.length);
+    list.forEach((it, k) => {
+      v3.set(it[0], it[1], it[2]); q.setFromEuler(eul.set(0, it[3], 0)); s3.set(it[4], it[5], it[6]);
+      im.setMatrixAt(k, tmp.compose(v3, q, s3).multiply(rel));
+    });
+    im.instanceMatrix.needsUpdate = true;
+    im.computeBoundingSphere();
+    scene.add(im);
+  });
+}
+
+// ---------------------------------------------------------------- blockout pieces (floors, backing walls, sky)
+const cv = document.createElement('canvas');
+cv.width = cv.height = 1024;
+const cx = cv.getContext('2d');
+cx.drawImage(floorImgs[0], 0, 0, 512, 512); cx.drawImage(floorImgs[0], 512, 512, 512, 512);
+cx.drawImage(floorImgs[1], 512, 0, 512, 512); cx.drawImage(floorImgs[1], 0, 512, 512, 512);
+const geos = {
+  box: new THREE.BoxGeometry(1, 1, 1), cyl: new THREE.CylinderGeometry(0.5, 0.5, 1, 32),
+  cone: new THREE.ConeGeometry(0.5, 1, 20), sphere: new THREE.SphereGeometry(0.5, 24, 16),
+};
+const palette = {};
+function paletteMat(key) {
+  if (palette[key]) return palette[key];
+  const d = data.mats[key] || data.mats.Stone;
+  const m = new THREE.MeshStandardMaterial({ roughness: d[1], metalness: d[2] * 0.5 });
+  m.color.setRGB(...d[0]);
+  m.emissive.setRGB(d[3][0] * d[4], d[3][1] * d[4], d[3][2] * d[4]);
+  return (palette[key] = m);
+}
+for (const b of data.boxes) {
+  let m;
+  const mesh = new THREE.Mesh(geos[b.s] || geos.box);
+  mesh.matrixAutoUpdate = false;
+  mesh.matrix.fromArray(b.x);
+  if (b.m === 'FloorChecker') {
+    const sx = new THREE.Vector3().setFromMatrixColumn(mesh.matrix, 0).length() * 100;
+    const sz = new THREE.Vector3().setFromMatrixColumn(mesh.matrix, 2).length() * 100;
+    const t = new THREE.CanvasTexture(cv);
+    t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = maxAniso;
+    t.repeat.set(sx / 272, sz / 272);
+    m = new THREE.MeshStandardMaterial({ map: t, roughness: 0.28 });
+  } else m = paletteMat(b.m);
+  mesh.material = m;
+  scene.add(mesh);
+}
+
+// night sky stars seen through the front arch
+{
+  const n = 500, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) toThree(6300, (Math.random() - 0.5) * 9000, 400 + Math.random() * 3600, v3).toArray(pos, i * 3);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xcfd8ff, size: 0.12, sizeAttenuation: true, fog: false })));
+}
+
+// ---------------------------------------------------------------- lights + flames
+scene.add(new THREE.HemisphereLight(0xffe2c0, 0x2a2438, 0.7));
+const moon = new THREE.DirectionalLight(0x8ca6ff, 0.5);
+moon.position.copy(toThree(2600, -700, 2400));
+scene.add(moon);
+const S2 = 0.68 * 0.68;
+const lamps = data.lights.map(l => {
+  const pl = new THREE.PointLight(new THREE.Color().setRGB(...l.c), l.i * S2 * 1.2, l.d * 1.3, 2);
+  pl.position.fromArray(l.p);
+  pl.userData.base = pl.intensity;
+  pl.userData.flicker = /Fireplace/.test(l.l);
+  scene.add(pl);
+  return pl;
+});
+
+function glowTexture(inner, outer) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const g = c.getContext('2d');
+  const r = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  r.addColorStop(0, inner); r.addColorStop(0.25, outer); r.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = r; g.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+const flameMat = new THREE.SpriteMaterial({ map: glowTexture('rgba(255,244,214,1)', 'rgba(255,150,50,0.55)'),
+  blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+const flames = data.flames.map((f, i) => {
+  const s = new THREE.Sprite(flameMat);
+  s.position.set(f[0], f[1], f[2]);
+  s.userData = { size: f[3], seed: i * 1.7 };
+  s.scale.setScalar(f[3]);
+  scene.add(s);
+  return s;
+});
+{
+  const f = data.dims.fountain;
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture('rgba(200,230,255,0.9)', 'rgba(60,120,255,0.35)'),
+    blending: THREE.AdditiveBlending, depthWrite: false }));
+  glow.position.copy(toThree(f[0], f[1], 140));
+  glow.scale.setScalar(4.2);
+  scene.add(glow);
+  flames.push(Object.assign(glow, { userData: { size: 4.2, seed: 0, slow: true } }));
+}
+
+// ---------------------------------------------------------------- camera collision boxes
+const camBoxes = data.cam.map(arr => {
+  const m = new THREE.Mesh(geos.box, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }));
+  m.matrixAutoUpdate = false;
+  m.matrix.fromArray(arr);
+  m.matrixWorld.copy(m.matrix);
+  return m;
+});
+const ray = new THREE.Raycaster();
+
+// ---------------------------------------------------------------- player
+const player = playerGltf.scene;
+player.traverse(o => {
+  if (o.isMesh) {
+    o.frustumCulled = false;
+    o.material.metalness = 0; o.material.roughness = 0.85;
+  }
+});
+scene.add(player);
+const mixer = new THREE.AnimationMixer(player);
+const acts = {}, weights = {};
+for (const clip of playerGltf.animations) {
+  const a = mixer.clipAction(clip);
+  a.play(); a.setEffectiveWeight(clip.name === 'Idle' ? 1 : 0);
+  acts[clip.name] = a; weights[clip.name] = clip.name === 'Idle' ? 1 : 0;
+}
+
+// ---------------------------------------------------------------- walkability grid
+const G = data.grid, EMPTY = -32768;
+function levelsAt(x, y, out) {
+  out.length = 0;
+  const i = Math.floor((x - G.x0) / G.cell), j = Math.floor((y - G.y0) / G.cell);
+  if (i < 0 || j < 0 || i >= G.nx || j >= G.ny) return out;
+  for (let n = 0; n < G.L; n++) {
+    const h = grid[(n * G.nx + i) * G.ny + j];
+    if (h !== EMPTY) out.push(h / G.q);
+  }
+  return out;
+}
+// solid spans (lo, hi pairs) in a cell; null outside the playable area
+const NCELL = G.nx * G.ny;
+function spansAt(x, y, out) {
+  out.length = 0;
+  const i = Math.floor((x - G.x0) / G.cell), j = Math.floor((y - G.y0) / G.cell);
+  if (i < 0 || j < 0 || i >= G.nx || j >= G.ny) return null;
+  const k = i * G.ny + j;
+  for (let n = 0; n < G.K; n++) {
+    const a = spans[(n * NCELL + k) * 2];
+    if (a === EMPTY) break;
+    out.push(a / G.q, spans[(n * NCELL + k) * 2 + 1] / G.q);
+  }
+  return out;
+}
+const overlaps = (sp, a, b) => { for (let n = 0; n < sp.length; n += 2) if (sp[n] < b && sp[n + 1] > a) return true; return false; };
+
+const STEP = data.player.step, HEIGHT = 2 * data.player.half, GRAVITY = 1400, JUMP_V = 430;
+const WALK = 230, RUN = 430;
+const st = { x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, grounded: true, face: 0, rz: 0 };
+let camYaw = 0, camPitch = 0.28, camDist = 2.7;
+function respawn(saved) {
+  const s = saved && saved.pos ? saved : null;
+  [st.x, st.y, st.z] = s ? s.pos : data.start.ue;
+  st.rz = st.z; st.vx = st.vy = st.vz = 0; st.grounded = true;
+  camYaw = s ? s.yaw : 0; st.face = camYaw + Math.PI;
+}
+
+const lv = [], spb = [];
+function tryStep(nx, ny) {
+  levelsAt(nx, ny, lv);
+  if (st.grounded) {
+    let best = null;
+    for (const h of lv) if (Math.abs(h - st.z) <= STEP && (best === null || Math.abs(h - st.z) < Math.abs(best - st.z))) best = h;
+    if (best !== null) { st.x = nx; st.y = ny; st.z = best; return true; }
+    const sp = spansAt(nx, ny, spb);
+    // a wall, an obstacle, or the edge of the floor we stand on: stop. Only a real open drop lets us fall.
+    if (!sp || !sp.length || overlaps(sp, st.z - STEP, st.z + HEIGHT)) return false;
+    st.x = nx; st.y = ny; st.grounded = false; st.vz = 0;
+    return true;
+  }
+  const sp = spansAt(nx, ny, spb);
+  if (!sp || overlaps(sp, st.z + 1, st.z + HEIGHT) || !lv.some(h => h <= st.z + 4)) return false;
+  st.x = nx; st.y = ny;
+  return true;
+}
+
+function physics(dt, wishX, wishY, running, jump) {
+  const speed = running ? RUN : WALK;
+  const accel = st.grounded ? 12 : 3;
+  st.vx += (wishX * speed - st.vx) * Math.min(1, accel * dt);
+  st.vy += (wishY * speed - st.vy) * Math.min(1, accel * dt);
+  if (jump && st.grounded) { st.grounded = false; st.vz = JUMP_V; }
+  // horizontal, in small sub-steps, x and y separately so walls slide
+  const dx = st.vx * dt, dy = st.vy * dt;
+  const n = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)) / 4));
+  for (let k = 0; k < n; k++) {
+    if (!tryStep(st.x + dx / n, st.y + dy / n)) {
+      if (!tryStep(st.x + dx / n, st.y)) { st.vx *= 0.5; }
+      if (!tryStep(st.x, st.y + dy / n)) { st.vy *= 0.5; }
+    }
+  }
+  if (!st.grounded) {
+    const z0 = st.z;
+    st.vz -= GRAVITY * dt;
+    st.z += st.vz * dt;
+    const sp = spansAt(st.x, st.y, spb);
+    let land = null;
+    if (sp) for (let n = 1; n < sp.length; n += 2) if (sp[n] <= z0 + 2 && sp[n] >= st.z && (land === null || sp[n] > land)) land = sp[n];
+    if (land !== null && st.vz <= 0) { st.z = land; st.vz = 0; st.grounded = true; }
+    else if (sp && st.vz > 0 && overlaps(sp, z0 + HEIGHT, st.z + HEIGHT)) { st.z = z0; st.vz = 0; }   // head bump
+    else if (!sp || !sp.length || st.z < -1500) respawn();
+  }
+  st.rz += (st.z - st.rz) * Math.min(1, dt * (st.grounded ? 18 : 60));
+}
+
+// ---------------------------------------------------------------- input
+const keys = new Set();
+let jumpQueued = false, locked = false, playing = false, touchRun = false;
+const stick = { x: 0, y: 0, id: null };
+addEventListener('keydown', e => {
+  if (!playing) return;
+  keys.add(e.code);
+  if (e.code === 'Space') { jumpQueued = true; e.preventDefault(); }
+  if (e.code === 'KeyR') respawn();
+  if (e.code.startsWith('Arrow')) e.preventDefault();
+});
+addEventListener('keyup', e => keys.delete(e.code));
+addEventListener('blur', () => keys.clear());
+
+const look = (dx, dy, k) => {
+  camYaw -= dx * k;
+  camPitch = Math.max(-0.45, Math.min(1.25, camPitch + dy * k));
+};
+document.addEventListener('mousemove', e => { if (locked) look(e.movementX, e.movementY, 0.0024); });
+let drag = null;
+const cvs = renderer.domElement;
+cvs.addEventListener('pointerdown', e => {
+  if (!playing) return;
+  if (e.pointerType === 'mouse' && !locked) requestLock();
+  drag = { id: e.pointerId, x: e.clientX, y: e.clientY };
+});
+cvs.addEventListener('pointermove', e => {
+  if (!drag || drag.id !== e.pointerId || locked) return;
+  look(e.clientX - drag.x, e.clientY - drag.y, e.pointerType === 'mouse' ? 0.005 : 0.006);
+  drag.x = e.clientX; drag.y = e.clientY;
+});
+const endDrag = e => { if (drag && drag.id === e.pointerId) drag = null; };
+cvs.addEventListener('pointerup', endDrag);
+cvs.addEventListener('pointercancel', endDrag);
+cvs.addEventListener('wheel', e => { camDist = Math.max(1.2, Math.min(7, camDist * (1 + Math.sign(e.deltaY) * 0.1))); e.preventDefault(); }, { passive: false });
+
+function requestLock() {
+  if (touchUI || !cvs.requestPointerLock) return;
+  try { const p = cvs.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) { /* drag-to-look still works */ }
+}
+document.addEventListener('pointerlockchange', () => {
+  const was = locked;
+  locked = document.pointerLockElement === cvs;
+  if (was && !locked && playing) pause();
+});
+
+// touch: joystick, run toggle, jump
+const knob = $('knob'), stickEl = $('stick');
+function stickMove(e) {
+  const r = stickEl.getBoundingClientRect();
+  let x = (e.clientX - r.left - r.width / 2) / (r.width / 2), y = (e.clientY - r.top - r.height / 2) / (r.height / 2);
+  const l = Math.hypot(x, y);
+  if (l > 1) { x /= l; y /= l; }
+  stick.x = x; stick.y = y;
+  knob.style.transform = `translate(${x * 40}px, ${y * 40}px)`;
+}
+stickEl.addEventListener('pointerdown', e => { stick.id = e.pointerId; stickEl.setPointerCapture(e.pointerId); stickMove(e); });
+stickEl.addEventListener('pointermove', e => { if (stick.id === e.pointerId) stickMove(e); });
+const stickEnd = e => { if (stick.id !== e.pointerId) return; stick.id = null; stick.x = stick.y = 0; knob.style.transform = ''; };
+stickEl.addEventListener('pointerup', stickEnd);
+stickEl.addEventListener('pointercancel', stickEnd);
+$('jump').addEventListener('pointerdown', e => { jumpQueued = true; e.preventDefault(); });
+$('run').addEventListener('click', () => { touchRun = !touchRun; $('run').setAttribute('aria-pressed', String(touchRun)); });
+
+// ---------------------------------------------------------------- screens
+function begin() {
+  playing = true;
+  $('start').hidden = true;
+  $('hud').hidden = false;
+  $('hint').hidden = touchUI;
+  $('touch').hidden = !touchUI;
+  requestLock();
+}
+function pause() {
+  playing = false;
+  keys.clear();
+  $('starttitle').textContent = 'Paused';
+  $('startcrest').textContent = 'Leafy Manor';
+  $('startsub').textContent = 'The mouse is free. Click Resume to keep exploring.';
+  $('go').textContent = 'Resume';
+  $('start').hidden = false;
+  $('hint').hidden = true;
+}
+$('go').addEventListener('click', begin);
+if (touchUI) {
+  $('keys').innerHTML = '<div><b><kbd>Stick</kbd></b>Move</div><div><b><kbd>Drag</kbd></b>Look around</div><div><b><kbd>Run</kbd></b>Toggle running</div><div><b><kbd>Jump</kbd></b>Jump</div>';
+}
+
+// ---------------------------------------------------------------- where am I
+const D = data.dims;
+function placeName() {
+  const { x, y, z } = st;
+  if (z > D.z_gallery - 60) return y < -D.half + 260 ? 'West Balcony' : y > D.half - 260 ? 'East Balcony' : 'North Balcony';
+  if (z > 40) return 'Grand Staircase';
+  if (x < -D.half) return 'Vestibule';
+  if (x > D.half) return x > D.porch_x1 - 40 ? 'Night Garden' : 'Front Porch';
+  if (Math.hypot(x - D.fountain[0], y - D.fountain[1]) < 420) return 'Crown Fountain';
+  if (Math.abs(x - D.lounge_x) < 330 && Math.abs(y) > D.half - 520) return y < 0 ? 'West Lounge' : 'East Lounge';
+  if (x > D.north_gal_x0 - 40 && z < 40) return 'Under the Balcony';
+  return 'Great Hall';
+}
+let lastPlace = '';
+
+// ---------------------------------------------------------------- loop
+const clock = new THREE.Clock();
+const pivot = new THREE.Vector3(), camPos = new THREE.Vector3(), dir = new THREE.Vector3();
+function frame() {
+  const dt = Math.min(0.05, clock.getDelta());
+  const t = clock.elapsedTime;
+
+  // input -> wish direction in three.js space, relative to the camera
+  let f = 0, r = 0;
+  if (playing) {
+    if (keys.has('KeyW') || keys.has('ArrowUp')) f += 1;
+    if (keys.has('KeyS') || keys.has('ArrowDown')) f -= 1;
+    if (keys.has('KeyD') || keys.has('ArrowRight')) r += 1;
+    if (keys.has('KeyA') || keys.has('ArrowLeft')) r -= 1;
+    f -= stick.y; r += stick.x;
+  }
+  const len = Math.hypot(f, r);
+  if (len > 1) { f /= len; r /= len; }
+  const sy = Math.sin(camYaw), cy = Math.cos(camYaw);
+  const wx3 = -sy * f + cy * r, wz3 = -cy * f - sy * r;          // three.js x / z
+  const running = keys.has('ShiftLeft') || keys.has('ShiftRight') || touchRun;
+  physics(dt, -wz3, wx3, running, jumpQueued && playing);        // UE x = -three z, UE y = three x
+  jumpQueued = false;
+
+  // character
+  const hs = Math.hypot(st.vx, st.vy);
+  if (hs > 15) {
+    const target = Math.atan2(st.vy / 100, -st.vx / 100);          // facing in three.js: atan2(x, z)
+    let d = target - st.face;
+    d = Math.atan2(Math.sin(d), Math.cos(d));
+    st.face += d * Math.min(1, dt * 12);
+  }
+  toThree(st.x, st.y, st.rz, player.position);
+  player.rotation.y = st.face;
+  const want = { Idle: 0, Walk: 0, Run: 0, Jump: 0 };
+  if (!st.grounded) want.Jump = 1;
+  else if (hs < 25) want.Idle = 1;
+  else if (hs < (WALK + RUN) / 2) want.Walk = 1;
+  else want.Run = 1;
+  for (const k in acts) {
+    weights[k] += ((want[k] || 0) - weights[k]) * Math.min(1, dt * 10);
+    acts[k].setEffectiveWeight(weights[k]);
+  }
+  if (acts.Walk) acts.Walk.timeScale = Math.max(0.6, hs / 105);
+  if (acts.Run) acts.Run.timeScale = Math.max(0.8, hs / 260);
+  mixer.update(dt);
+
+  // camera: orbit, pulled in by walls
+  pivot.set(player.position.x, player.position.y + 0.8, player.position.z);
+  dir.set(Math.sin(camYaw) * Math.cos(camPitch), Math.sin(camPitch), Math.cos(camYaw) * Math.cos(camPitch));
+  ray.set(pivot, dir);
+  ray.far = camDist + 0.3;
+  const hit = ray.intersectObjects(camBoxes, false)[0];
+  const dist = hit ? Math.max(0.35, hit.distance - 0.25) : camDist;
+  camPos.copy(pivot).addScaledVector(dir, dist);
+  camera.position.lerp(camPos, playing ? Math.min(1, dt * 14) : 1);
+  if (!playing && !$('start').hidden && $('go').textContent !== 'Resume') camYaw += dt * 0.05;
+  camera.lookAt(pivot);
+
+  // flicker
+  for (const s of flames) {
+    const u = s.userData;
+    const k = u.slow ? 1 + 0.06 * Math.sin(t * 1.3) : 1 + 0.12 * Math.sin(t * 11 + u.seed) + 0.07 * Math.sin(t * 23.7 + u.seed * 3);
+    s.scale.setScalar(u.size * k);
+  }
+  for (const l of lamps) if (l.userData.flicker) l.intensity = l.userData.base * (1 + 0.15 * Math.sin(t * 9) + 0.08 * Math.sin(t * 21));
+
+  // HUD
+  if (playing) {
+    const p = placeName();
+    if (p !== lastPlace) { $('place').textContent = lastPlace = p; }
+    $('level').textContent = (st.rz > D.z_gallery - 60 ? 'Balcony level' : st.rz > 40 ? 'Stairs' : 'Ground floor') + ' · ' + (st.rz / 100).toFixed(1) + ' m';
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+
+function start(saved) {
+  respawn(saved);
+  camPos.set(0, 0, 0);
+  $('loader').hidden = true;
+  $('start').hidden = false;
+  window.claude?.hot?.snapshot?.(() => ({ pos: [st.x, st.y, st.z], yaw: camYaw }));
+  requestAnimationFrame(frame);
+}
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>
