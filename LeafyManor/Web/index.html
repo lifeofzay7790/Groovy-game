@@ -70,6 +70,45 @@
     border-radius: 50%; border: 1px solid var(--line); background: rgba(10, 14, 29, 0.5); color: var(--cream);
     font: 600 11px var(--body); letter-spacing: 0.1em; text-transform: uppercase; pointer-events: auto; touch-action: none; }
   #run[aria-pressed="true"] { background: var(--gold); color: var(--night); }
+  .btn-ghost { background: transparent; color: var(--cream); border: 1px solid var(--line); }
+  .btn-ghost:hover { background: rgba(217, 172, 86, 0.12); }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+  #modebtn { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 16px); right: 16px; z-index: 4;
+    font: 600 12px/1 var(--body); letter-spacing: 0.12em; text-transform: uppercase; padding: 11px 14px; cursor: pointer;
+    color: var(--cream); background: var(--panel); border: 1px solid var(--line); }
+  #modebtn:hover { border-color: var(--gold); }
+  #modebtn:focus-visible, .ed button:focus-visible, .ed select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  .ed { position: fixed; right: 16px; top: calc(env(safe-area-inset-top, 0px) + 64px); z-index: 4; width: 310px;
+    max-height: calc(100% - 96px); overflow-y: auto; display: grid; gap: 16px; padding: 16px;
+    background: rgba(10, 14, 29, 0.9); border-left: 2px solid var(--gold); font-size: 13px; }
+  .ed h2 { font-family: var(--display); font-weight: 400; font-size: 20px; letter-spacing: 0.06em; margin: 0; }
+  .ed .small { color: var(--mist); font-size: 12px; line-height: 1.5; margin: 0; }
+  .ed .label { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+  .ed section { display: grid; gap: 8px; }
+  .ed .row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ed button, .ed select { font: 600 12px/1 var(--body); color: var(--cream); background: rgba(241, 230, 207, 0.06);
+    border: 1px solid var(--line); padding: 9px 10px; cursor: pointer; }
+  .ed select { flex: 1 1 140px; min-width: 0; }
+  .ed select option { background: var(--night); }
+  .ed button:hover:not(:disabled) { border-color: var(--gold); }
+  .ed button:disabled { opacity: 0.4; cursor: default; }
+  .ed button.primary { background: var(--gold); color: var(--night); border-color: var(--gold); }
+  .ed button.danger { color: #f0a38a; border-color: rgba(240, 163, 138, 0.45); }
+  .ed button kbd { margin-left: 4px; padding: 2px 4px; min-width: 0; font-size: 10px; }
+  #selname { font-family: var(--display); font-size: 18px; letter-spacing: 0.04em; }
+  #savestate { display: flex; gap: 8px; align-items: baseline; }
+  #savestate::before { content: ""; flex: none; width: 7px; height: 7px; background: var(--leaf); transform: translateY(-1px); }
+  #savestate.busy::before { background: var(--gold); }
+  #savestate.bad::before { background: #f0a38a; }
+  #copybox { width: 100%; height: 90px; font: 11px/1.4 ui-monospace, Consolas, monospace; color: var(--cream);
+    background: rgba(0, 0, 0, 0.35); border: 1px solid var(--line); resize: vertical; }
+  #toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 72px); transform: translateX(-50%); z-index: 6;
+    padding: 12px 18px; background: rgba(10, 14, 29, 0.92); border: 1px solid var(--line); font-size: 14px; max-width: calc(100% - 32px); }
+  @media (max-width: 720px) {
+    .ed { left: 16px; right: 16px; top: auto; width: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); max-height: 46%; }
+  }
   @media (prefers-reduced-motion: reduce) { #bar { transition: none; } }
 </style>
 </head>
@@ -83,6 +122,7 @@
   <span><kbd>Space</kbd> jump</span>
   <span><kbd>Wheel</kbd> zoom</span>
   <span><kbd>R</kbd> back to the door</span>
+  <span><kbd>Tab</kbd> edit the hall</span>
   <span><kbd>Esc</kbd> free the mouse</span>
 </div>
 <div id="touch" hidden>
@@ -90,6 +130,48 @@
   <button id="run" type="button" aria-pressed="false">Run</button>
   <button id="jump" type="button">Jump</button>
 </div>
+<button id="modebtn" type="button" hidden>Edit hall</button>
+<div id="toast" role="status" hidden></div>
+
+<aside class="ed" id="editor" aria-label="Hall editor" hidden>
+  <header style="display:grid;gap:6px">
+    <h2>Edit the hall</h2>
+    <p class="small" id="savestate">Loading your saved changes…</p>
+  </header>
+  <section aria-live="polite">
+    <div class="label">Selected</div>
+    <p class="small" id="selnone">Click a piece of furniture or a prop to select it, then drag it to move it.</p>
+    <div id="selinfo" hidden style="display:grid;gap:8px">
+      <div><div id="selname">Sofa</div><p class="small" id="sellabel"></p></div>
+      <div class="row">
+        <button type="button" id="turnL">Turn left<kbd>Q</kbd></button>
+        <button type="button" id="turnR">Turn right<kbd>E</kbd></button>
+        <button type="button" id="dup">Duplicate</button>
+        <button type="button" id="del" class="danger">Delete</button>
+      </div>
+    </div>
+  </section>
+  <section>
+    <label class="label" for="addmodel">Add a model</label>
+    <div class="row">
+      <select id="addmodel"></select>
+      <select id="addfloor" aria-label="Which floor"><option value="0">Ground floor</option><option value="1">Balcony</option></select>
+    </div>
+    <div class="row"><button type="button" id="addbtn" class="primary">Add to the middle of the view</button></div>
+  </section>
+  <section>
+    <div class="label">Changes</div>
+    <p class="small" id="changecount">No changes yet.</p>
+    <div class="row">
+      <button type="button" id="undo">Undo<kbd>Ctrl Z</kbd></button>
+      <button type="button" id="copy">Copy changes</button>
+      <button type="button" id="reset" class="danger">Reset all</button>
+    </div>
+    <textarea id="copybox" readonly hidden aria-label="Your changes as text"></textarea>
+    <p class="small" id="walkinfo"></p>
+  </section>
+  <p class="small">Drag a model to move it. Drag empty space to look around, right-drag to slide the view, and use the wheel to zoom. <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> also slide the view. Walls and stairs stay fixed.</p>
+</aside>
 
 <div class="screen" id="loader">
   <div class="card">
@@ -105,14 +187,17 @@
   <div class="card">
     <div class="crest" id="startcrest">Entrance hall · 24.5 m × 24.5 m</div>
     <h1 id="starttitle">Leafy Manor</h1>
-    <p class="sub" id="startsub">Walk the hall, climb either staircase to the balcony, and step out through the front arch to the night garden.</p>
-    <button class="btn" id="go" type="button">Enter the hall</button>
+    <p class="sub" id="startsub">Walk the hall, climb either staircase to the balcony, and step out through the front arch to the night garden. Or rearrange the furniture first.</p>
+    <div class="actions">
+      <button class="btn" id="go" type="button">Enter the hall</button>
+      <button class="btn btn-ghost" id="goedit" type="button">Edit the hall</button>
+    </div>
     <div class="keys" id="keys">
       <div><b><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></b>Move</div>
       <div><b><kbd>Mouse</kbd></b>Look around</div>
       <div><b><kbd>Shift</kbd></b>Run</div>
       <div><b><kbd>Space</kbd></b>Jump</div>
-      <div><b><kbd>Wheel</kbd></b>Camera distance</div>
+      <div><b><kbd>Tab</kbd></b>Edit the hall</div>
       <div><b><kbd>R</kbd></b>Back to the entrance</div>
     </div>
   </div>
@@ -130,7 +215,173 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const $ = id => document.getElementById(id);
 const touchUI = matchMedia('(pointer: coarse)').matches;
+const D2R = Math.PI / 180;
 const fail = msg => { $('loader').hidden = false; $('start').hidden = true; $('loadmsg').textContent = msg; $('loadmsg').classList.add('err'); };
+
+// BEGIN walkgrid ------------------------------------------------------------------
+// Walkability grid: a port of Tools/validate_blockout.py (Grid + analyse + flood), so the hall is
+// re-checked in the browser after props move. Unreal centimetres: +X north, +Y east, +Z up.
+const EMPTY = -32768;
+
+function prepareSolid(s) {
+  const h = [s.size[0] / 2, s.size[1] / 2, s.size[2] / 2];
+  let axes = null, ex;
+  if (s.shape === 'box') {
+    const p = s.pitch * D2R, y = s.yaw * D2R;
+    const cp = Math.cos(p), sp = Math.sin(p), cy = Math.cos(y), sy = Math.sin(y);
+    axes = [[cp * cy, cp * sy, sp], [-sy, cy, 0], [-sp * cy, -sp * sy, cp]];
+    ex = [0, 1, 2].map(i => axes.reduce((a, ax, k) => a + Math.abs(ax[i]) * h[k], 0));
+  } else {
+    if (Math.abs(s.yaw) > 1e-9) h[0] = h[1] = Math.max(h[0], h[1]);
+    ex = h.slice();
+  }
+  const c = s.c;
+  return { c, h, axes, su: !!s.su, bounds: [[c[0] - ex[0], c[0] + ex[0]], [c[1] - ex[1], c[1] + ex[1]]] };
+}
+
+function solidColumn(s, x, y) {
+  const [cx, cy, cz] = s.c;
+  if (!s.axes) {
+    const u = (x - cx) / s.h[0], v = (y - cy) / s.h[1];
+    return u * u + v * v > 1 ? null : [cz - s.h[2], cz + s.h[2]];
+  }
+  let lo = -Infinity, hi = Infinity;
+  for (let k = 0; k < 3; k++) {
+    const [e0, e1, e2] = s.axes[k], h = s.h[k];
+    const a = (x - cx) * e0 + (y - cy) * e1 - cz * e2;
+    if (Math.abs(e2) < 1e-12) {
+      if (Math.abs(a) > h) return null;
+      continue;
+    }
+    let z1 = (-h - a) / e2, z2 = (h - a) / e2;
+    if (z1 > z2) [z1, z2] = [z2, z1];
+    lo = Math.max(lo, z1); hi = Math.min(hi, z2);
+    if (lo > hi) return null;
+  }
+  return [lo, hi];
+}
+
+// g: {x0, y0, cell, nx, ny, radius, half, step, z_top, zmax, start: [x, y, z], q}
+function buildGrid(g, solidList) {
+  const { x0, y0, cell, nx, ny } = g, N = nx * ny;
+  const height = 2 * g.half, step = g.step, trunc = Math.trunc;
+  const spans = new Array(N), thinOffs = [];
+  for (const a of [-0.45, 0, 0.45]) for (const b of [-0.45, 0, 0.45]) thinOffs.push([a * cell, b * cell]);
+  for (const raw of solidList) {
+    const s = prepareSolid(raw);
+    const [[bx0, bx1], [by0, by1]] = s.bounds;
+    const i0 = Math.max(0, trunc((bx0 - x0) / cell)), i1 = Math.min(nx - 1, trunc((bx1 - x0) / cell));
+    const j0 = Math.max(0, trunc((by0 - y0) / cell)), j1 = Math.min(ny - 1, trunc((by1 - y0) / cell));
+    const offs = Math.min(bx1 - bx0, by1 - by0) < 3 * cell ? thinOffs : [[0, 0]];
+    for (let i = i0; i <= i1; i++) {
+      const x = x0 + (i + 0.5) * cell;
+      for (let j = j0; j <= j1; j++) {
+        const y = y0 + (j + 0.5) * cell;
+        let lo = null, hi = null;
+        for (const [ox, oy] of offs) {
+          const r = solidColumn(s, x + ox, y + oy);
+          if (r) { if (lo === null) { lo = r[0]; hi = r[1]; } else { lo = Math.min(lo, r[0]); hi = Math.max(hi, r[1]); } }
+        }
+        if (lo === null) continue;
+        const k = i * ny + j;
+        (spans[k] || (spans[k] = [])).push([lo, hi, s.su]);
+      }
+    }
+  }
+  for (let k = 0; k < N; k++) {             // merge touching spans (steppable only if every part is)
+    const sp = spans[k];
+    if (!sp) continue;
+    sp.sort((a, b) => a[0] - b[0] || a[1] - b[1] || (a[2] - b[2]));
+    const m = [sp[0].slice()];
+    for (let n = 1; n < sp.length; n++) {
+      const [lo, hi, su] = sp[n], last = m[m.length - 1];
+      if (lo <= last[1] + 0.5) { last[1] = Math.max(last[1], hi); last[2] = last[2] && su; }
+      else m.push([lo, hi, su]);
+    }
+    spans[k] = m;
+  }
+  const rc = Math.ceil(g.radius / cell), disk = [];
+  for (let di = -rc; di <= rc; di++) for (let dj = -rc; dj <= rc; dj++) if (Math.hypot(di * cell, dj * cell) <= g.radius) disk.push([di, dj]);
+  const valid = new Array(N);                // standing spots: capsule headroom, nothing within the radius
+  for (let i = 0; i < nx; i++) {
+    for (let j = 0; j < ny; j++) {
+      const k = i * ny + j, sp = spans[k];
+      if (!sp) continue;
+      let ok = null;
+      for (let n = 0; n < sp.length; n++) {
+        const t = sp[n][1], nxt = n + 1 < sp.length ? sp[n + 1][0] : Infinity;
+        if (!(nxt - t >= height && t < g.z_top)) continue;
+        let blocked = false;
+        for (const [di, dj] of disk) {
+          const ii = i + di, jj = j + dj;
+          if (ii < 0 || jj < 0 || ii >= nx || jj >= ny) continue;
+          const s2 = spans[ii * ny + jj];
+          if (!s2) continue;
+          for (const [lo, hi, su] of s2) if (lo < t + height && hi > t + (su ? step : 0.5)) { blocked = true; break; }
+          if (blocked) break;
+        }
+        if (!blocked) (ok || (ok = [])).push(t);
+      }
+      if (ok) valid[k] = ok;
+    }
+  }
+  const [sx, sy, sz] = g.start;              // flood fill on foot from the player start
+  const ci = trunc((sx - x0) / cell), cj = trunc((sy - y0) / cell), r = trunc(40 / cell);
+  let start = null, best = Infinity;
+  for (let di = -r; di <= r; di++) for (let dj = -r; dj <= r; dj++) {
+    const i = ci + di, j = cj + dj;
+    if (i < 0 || j < 0 || i >= nx || j >= ny || !valid[i * ny + j]) continue;
+    for (const t of valid[i * ny + j]) if (Math.abs(t - sz) <= 30) {
+      const d = Math.hypot(di, dj) + Math.abs(t - sz) / cell;
+      if (d < best) { best = d; start = [i, j, t]; }
+    }
+  }
+  const reach = new Array(N);
+  let count = 0;
+  if (start) {
+    const mark = (i, j, t) => { const c = i * ny + j; (reach[c] || (reach[c] = [])).push(t); count++; };
+    const queue = [start];
+    mark(...start);
+    for (let qi = 0; qi < queue.length; qi++) {
+      const [i, j, t] = queue[qi];
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const ii = i + di, jj = j + dj;
+        if (ii < 0 || jj < 0 || ii >= nx || jj >= ny) continue;
+        const v = valid[ii * ny + jj];
+        if (!v) continue;
+        let u = null;
+        for (const c of v) if (Math.abs(c - t) <= step && (u === null || Math.abs(c - t) < Math.abs(u - t))) u = c;
+        if (u === null) continue;
+        const seen = reach[ii * ny + jj];
+        if (!seen || !seen.includes(u)) { mark(ii, jj, u); queue.push([ii, jj, u]); }
+      }
+    }
+  }
+  let L = 1, K = 1;
+  for (let k = 0; k < N; k++) {
+    if (reach[k]) L = Math.max(L, reach[k].length);
+    if (spans[k]) K = Math.max(K, spans[k].filter(s => s[0] < g.zmax).length);
+  }
+  const levels = new Int16Array(N * L).fill(EMPTY), packed = new Int16Array(N * K * 2).fill(EMPTY);
+  for (let k = 0; k < N; k++) {
+    if (reach[k]) reach[k].slice().sort((a, b) => a - b).forEach((t, n) => { levels[n * N + k] = Math.round(t * g.q); });
+    if (spans[k]) spans[k].filter(s => s[0] < g.zmax).forEach((s, n) => {
+      packed[(n * N + k) * 2] = Math.round(Math.max(s[0], -2000) * g.q);
+      packed[(n * N + k) * 2 + 1] = Math.round(Math.min(s[1], g.zmax) * g.q);
+    });
+  }
+  return { levels, spans: packed, L, K, reach: count };
+}
+
+// collision solid of a prop at pivot (x, y, z) with actor yaw, from its box size and pivot offset
+function itemSolid(it) {
+  const a = it.yaw * D2R, [ox, oy, oz] = it.o;
+  return {
+    shape: it.sh === 'cyl' ? 'cyl' : 'box', size: it.b, pitch: 0, yaw: it.yaw, su: it.su,
+    c: [it.x + ox * Math.cos(a) - oy * Math.sin(a), it.y + ox * Math.sin(a) + oy * Math.cos(a), it.z + oz],
+  };
+}
+// END walkgrid --------------------------------------------------------------------
 
 // ---------------------------------------------------------------- renderer + scene
 let renderer;
@@ -145,6 +396,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.92;
 $('view').appendChild(renderer.domElement);
+const cvs = renderer.domElement;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x05070f);
@@ -159,7 +411,7 @@ function resize() {
 addEventListener('resize', resize);
 resize();
 
-// UE centimetres (X north, Y east, Z up) -> three.js metres
+// UE centimetres (X north, Y east, Z up) <-> three.js metres
 const toThree = (x, y, z, out = new THREE.Vector3()) => out.set(y / 100, z / 100, -x / 100);
 
 // ---------------------------------------------------------------- loading
@@ -174,22 +426,21 @@ function onBytes(key, loaded) {
 const loader = new GLTFLoader();
 const loadGLTF = (url, key) => new Promise((res, rej) => loader.load(url, res, e => onBytes(key, e.loaded), rej));
 const loadImage = url => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
-
 async function gunzip16(b64) {
   const bin = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
   const stream = new Blob([bin]).stream().pipeThrough(new DecompressionStream('gzip'));
   return new Int16Array(await new Response(stream).arrayBuffer());
 }
-const decodeGrid = g => Promise.all([gunzip16(g.b64), gunzip16(g.spans)]);
 
 let data, kitGltf, playerGltf, grid, spans, floorImgs;
 try {
   data = await (await fetch('scene.json')).json();
   totalBytes = data.bytes['kit.json'] + data.bytes['player.json'];
-  [kitGltf, playerGltf, [grid, spans], floorImgs] = await Promise.all([
+  [kitGltf, playerGltf, grid, spans, floorImgs] = await Promise.all([
     loadGLTF('kit.json', 'kit'),
     loadGLTF('player.json', 'player'),
-    decodeGrid(data.grid),
+    gunzip16(data.grid.b64),
+    gunzip16(data.grid.spans),
     Promise.all([loadImage('floor_cream.jpg'), loadImage('floor_black.jpg')]),
   ]);
 } catch (e) {
@@ -200,43 +451,53 @@ try {
 $('loadmsg').textContent = 'Lighting the candles…';
 $('loadwhat').textContent = 'Building the hall';
 
-// ---------------------------------------------------------------- kit instances
+// ---------------------------------------------------------------- kit models
 const maxAniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 kitGltf.scene.updateMatrixWorld(true);
-const named = {};
-kitGltf.scene.traverse(o => { if (data.kit[o.name] && !named[o.name]) named[o.name] = o; });
-const tmp = new THREE.Matrix4(), q = new THREE.Quaternion(), eul = new THREE.Euler(), v3 = new THREE.Vector3(), s3 = new THREE.Vector3();
-const seenMats = new Set();
-for (const [name, list] of Object.entries(data.kit)) {
-  const node = named[name];
-  if (!node) continue;
-  const inv = node.matrixWorld.clone().invert();
-  node.traverse(o => {
-    if (!o.isMesh) return;
-    const rel = inv.clone().multiply(o.matrixWorld);
-    const m = o.material;
-    if (!seenMats.has(m)) {
-      seenMats.add(m);
-      m.metalness = 0; m.roughness = 0.62;
-      if (m.map) m.map.anisotropy = maxAniso;
-    }
-    const im = new THREE.InstancedMesh(o.geometry, m, list.length);
-    list.forEach((it, k) => {
-      v3.set(it[0], it[1], it[2]); q.setFromEuler(eul.set(0, it[3], 0)); s3.set(it[4], it[5], it[6]);
-      im.setMatrixAt(k, tmp.compose(v3, q, s3).multiply(rel));
+const protos = {};                           // mesh name -> [{geometry, material, rel}]
+{
+  const named = {};
+  kitGltf.scene.traverse(o => { if (o.name.startsWith('SM_LM_') && !named[o.name]) named[o.name] = o; });
+  const seenMats = new Set();
+  for (const [name, node] of Object.entries(named)) {
+    const inv = node.matrixWorld.clone().invert(), parts = [];
+    node.traverse(o => {
+      if (!o.isMesh) return;
+      if (!seenMats.has(o.material)) {
+        seenMats.add(o.material);
+        o.material.metalness = 0; o.material.roughness = 0.62;
+        if (o.material.map) o.material.map.anisotropy = maxAniso;
+      }
+      parts.push({ geometry: o.geometry, material: o.material, rel: inv.clone().multiply(o.matrixWorld) });
     });
-    im.instanceMatrix.needsUpdate = true;
-    im.computeBoundingSphere();
-    scene.add(im);
-  });
+    protos[name] = parts;
+  }
+}
+// fixed models (walls, stairs, trims): one instanced draw per part
+{
+  const tmp = new THREE.Matrix4(), q = new THREE.Quaternion(), eul = new THREE.Euler(), v3 = new THREE.Vector3(), s3 = new THREE.Vector3();
+  for (const [name, list] of Object.entries(data.kit)) {
+    for (const part of protos[name] || []) {
+      const im = new THREE.InstancedMesh(part.geometry, part.material, list.length);
+      list.forEach((it, k) => {
+        v3.set(it[0], it[1], it[2]); q.setFromEuler(eul.set(0, it[3], 0)); s3.set(it[4], it[5], it[6]);
+        im.setMatrixAt(k, tmp.compose(v3, q, s3).multiply(part.rel));
+      });
+      im.instanceMatrix.needsUpdate = true;
+      im.computeBoundingSphere();
+      scene.add(im);
+    }
+  }
 }
 
 // ---------------------------------------------------------------- blockout pieces (floors, backing walls, sky)
 const cv = document.createElement('canvas');
 cv.width = cv.height = 1024;
-const cx = cv.getContext('2d');
-cx.drawImage(floorImgs[0], 0, 0, 512, 512); cx.drawImage(floorImgs[0], 512, 512, 512, 512);
-cx.drawImage(floorImgs[1], 512, 0, 512, 512); cx.drawImage(floorImgs[1], 0, 512, 512, 512);
+{
+  const cx = cv.getContext('2d');
+  cx.drawImage(floorImgs[0], 0, 0, 512, 512); cx.drawImage(floorImgs[0], 512, 512, 512, 512);
+  cx.drawImage(floorImgs[1], 512, 0, 512, 512); cx.drawImage(floorImgs[1], 0, 512, 512, 512);
+}
 const geos = {
   box: new THREE.BoxGeometry(1, 1, 1), cyl: new THREE.CylinderGeometry(0.5, 0.5, 1, 32),
   cone: new THREE.ConeGeometry(0.5, 1, 20), sphere: new THREE.SphereGeometry(0.5, 24, 16),
@@ -251,7 +512,6 @@ function paletteMat(key) {
   return (palette[key] = m);
 }
 for (const b of data.boxes) {
-  let m;
   const mesh = new THREE.Mesh(geos[b.s] || geos.box);
   mesh.matrixAutoUpdate = false;
   mesh.matrix.fromArray(b.x);
@@ -261,16 +521,13 @@ for (const b of data.boxes) {
     const t = new THREE.CanvasTexture(cv);
     t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = maxAniso;
     t.repeat.set(sx / 272, sz / 272);
-    m = new THREE.MeshStandardMaterial({ map: t, roughness: 0.28 });
-  } else m = paletteMat(b.m);
-  mesh.material = m;
+    mesh.material = new THREE.MeshStandardMaterial({ map: t, roughness: 0.28 });
+  } else mesh.material = paletteMat(b.m);
   scene.add(mesh);
 }
-
-// night sky stars seen through the front arch
-{
-  const n = 500, pos = new Float32Array(n * 3);
-  for (let i = 0; i < n; i++) toThree(6300, (Math.random() - 0.5) * 9000, 400 + Math.random() * 3600, v3).toArray(pos, i * 3);
+{ // night sky stars seen through the front arch
+  const n = 500, pos = new Float32Array(n * 3), v = new THREE.Vector3();
+  for (let i = 0; i < n; i++) toThree(6300, (Math.random() - 0.5) * 9000, 400 + Math.random() * 3600, v).toArray(pos, i * 3);
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xcfd8ff, size: 0.12, sizeAttenuation: true, fog: false })));
@@ -290,7 +547,6 @@ const lamps = data.lights.map(l => {
   scene.add(pl);
   return pl;
 });
-
 function glowTexture(inner, outer) {
   const c = document.createElement('canvas');
   c.width = c.height = 128;
@@ -304,25 +560,26 @@ function glowTexture(inner, outer) {
 }
 const flameMat = new THREE.SpriteMaterial({ map: glowTexture('rgba(255,244,214,1)', 'rgba(255,150,50,0.55)'),
   blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
-const flames = data.flames.map((f, i) => {
-  const s = new THREE.Sprite(flameMat);
-  s.position.set(f[0], f[1], f[2]);
-  s.userData = { size: f[3], seed: i * 1.7 };
-  s.scale.setScalar(f[3]);
+const waterMat = new THREE.SpriteMaterial({ map: glowTexture('rgba(200,230,255,0.9)', 'rgba(60,120,255,0.35)'),
+  blending: THREE.AdditiveBlending, depthWrite: false });
+const flames = new Set();
+function addFlame(pos, size, mat = flameMat, slow = false) {
+  const s = new THREE.Sprite(mat);
+  s.position.copy(pos);
+  s.userData = { size, seed: Math.random() * 10, slow };
+  s.scale.setScalar(size);
   scene.add(s);
+  flames.add(s);
   return s;
-});
-{
-  const f = data.dims.fountain;
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture('rgba(200,230,255,0.9)', 'rgba(60,120,255,0.35)'),
-    blending: THREE.AdditiveBlending, depthWrite: false }));
-  glow.position.copy(toThree(f[0], f[1], 140));
-  glow.scale.setScalar(4.2);
-  scene.add(glow);
-  flames.push(Object.assign(glow, { userData: { size: 4.2, seed: 0, slow: true } }));
 }
+for (const f of data.flames) addFlame(new THREE.Vector3(f[0], f[1], f[2]), f[3]);
+// flames that belong to movable props: [mesh pattern, offset in the model's own frame (cm, front = +Y), size]
+const PROP_FLAMES = [
+  [/WallSconce/, [0, 22, 48], 0.5], [/Candelabra_Floor/, [0, 0, 132], 0.7], [/Candelabra_Small/, [0, 0, 56], 0.35],
+  [/Fire_01/, [0, 0, 35], 1.6], [/Lantern/, [0, 0, 30], 0.5], [/Fountain_01/, [0, 0, 140], 4.2, true],
+];
 
-// ---------------------------------------------------------------- camera collision boxes
+// ---------------------------------------------------------------- camera collision boxes (walls, floors, stairs)
 const camBoxes = data.cam.map(arr => {
   const m = new THREE.Mesh(geos.box, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide }));
   m.matrixAutoUpdate = false;
@@ -332,13 +589,61 @@ const camBoxes = data.cam.map(arr => {
 });
 const ray = new THREE.Raycaster();
 
+// ---------------------------------------------------------------- movable props
+// item: {l label, m mesh, x y z (cm), yaw (deg), s scale, b box size, o pivot offset, c collides, sh shape,
+//        su can step on, par parent label, orig original placement or null when added, obj, fx}
+const itemRoot = new THREE.Group();
+scene.add(itemRoot);
+const items = new Map();
+const catalog = data.catalog;
+const nice = m => m.replace(/^SM_LM_/, '').replace(/_\d+$/, '').replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2');
+const localToWorld = (it, [lx, ly, lz]) => {
+  const a = it.yaw * D2R;
+  return [it.x + lx * Math.cos(a) - ly * Math.sin(a), it.y + lx * Math.sin(a) + ly * Math.cos(a), it.z + lz];
+};
+function placeItem(it) {
+  toThree(it.x, it.y, it.z, it.obj.position);
+  it.obj.rotation.set(0, (90 - it.yaw) * D2R, 0);
+  it.obj.scale.set(it.s[0], it.s[2], it.s[1]);
+  it.obj.updateMatrixWorld(true);
+  for (const f of it.fx) toThree(...localToWorld(it, f.local), f.sprite.position);
+}
+function createItem(def) {
+  const it = { ...def, s: def.s.slice(), b: def.b.slice(), o: def.o.slice(), fx: [] };
+  it.obj = new THREE.Group();
+  it.obj.userData.label = it.l;
+  for (const part of protos[it.m] || []) {
+    const mesh = new THREE.Mesh(part.geometry, part.material);
+    mesh.matrixAutoUpdate = false;
+    mesh.matrix.copy(part.rel);
+    it.obj.add(mesh);
+  }
+  for (const [re, local, size, water] of PROP_FLAMES) {
+    if (re.test(it.m)) it.fx.push({ local, sprite: addFlame(new THREE.Vector3(), size, water ? waterMat : flameMat, !!water) });
+  }
+  itemRoot.add(it.obj);
+  items.set(it.l, it);
+  placeItem(it);
+  return it;
+}
+function removeItem(it) {
+  itemRoot.remove(it.obj);
+  for (const f of it.fx) { scene.remove(f.sprite); flames.delete(f.sprite); }
+  items.delete(it.l);
+  if (selected === it) select(null);
+}
+const defOf = it => ({ l: it.l, m: it.m, x: it.x, y: it.y, z: it.z, yaw: it.yaw, s: it.s.slice(), b: it.b.slice(), o: it.o.slice(),
+  c: it.c, sh: it.sh, su: it.su, par: it.par, orig: it.orig });
+const ORIGINAL = data.items.map(d => ({ l: d.l, m: d.m, x: d.p[0], y: d.p[1], z: d.p[2], yaw: d.yaw, s: d.s, b: d.b, o: d.o,
+  c: d.c, sh: d.sh, su: d.su, par: d.par, orig: { x: d.p[0], y: d.p[1], z: d.p[2], yaw: d.yaw } }));
+for (const d of ORIGINAL) createItem(d);
+const children = it => [...items.values()].filter(c => c.par === it.l);
+const family = it => [it, ...children(it).flatMap(family)];
+
 // ---------------------------------------------------------------- player
 const player = playerGltf.scene;
 player.traverse(o => {
-  if (o.isMesh) {
-    o.frustumCulled = false;
-    o.material.metalness = 0; o.material.roughness = 0.85;
-  }
+  if (o.isMesh) { o.frustumCulled = false; o.material.metalness = 0; o.material.roughness = 0.85; }
 });
 scene.add(player);
 const mixer = new THREE.AnimationMixer(player);
@@ -349,21 +654,24 @@ for (const clip of playerGltf.animations) {
   acts[clip.name] = a; weights[clip.name] = clip.name === 'Idle' ? 1 : 0;
 }
 
-// ---------------------------------------------------------------- walkability grid
-const G = data.grid, EMPTY = -32768;
+// ---------------------------------------------------------------- walkability
+const G = data.grid;
+let NCELL = G.nx * G.ny;
+const cellArea = G.cell * G.cell / 1e4;
+let baseArea = 0, walkArea = 0;
+{ let n = 0; for (let k = 0; k < NCELL * G.L; k++) if (grid[k] !== EMPTY) n++; baseArea = walkArea = n * cellArea; }
+const staticSolids = data.solids.map(s => ({ shape: s[0] ? 'cyl' : 'box', c: s.slice(1, 4), size: s.slice(4, 7), pitch: s[7], yaw: s[8], su: s[9] }));
 function levelsAt(x, y, out) {
   out.length = 0;
   const i = Math.floor((x - G.x0) / G.cell), j = Math.floor((y - G.y0) / G.cell);
   if (i < 0 || j < 0 || i >= G.nx || j >= G.ny) return out;
   for (let n = 0; n < G.L; n++) {
-    const h = grid[(n * G.nx + i) * G.ny + j];
+    const h = grid[n * NCELL + i * G.ny + j];
     if (h !== EMPTY) out.push(h / G.q);
   }
   return out;
 }
-// solid spans (lo, hi pairs) in a cell; null outside the playable area
-const NCELL = G.nx * G.ny;
-function spansAt(x, y, out) {
+function spansAt(x, y, out) {                // solid spans (lo, hi pairs) in a cell; null outside the playable area
   out.length = 0;
   const i = Math.floor((x - G.x0) / G.cell), j = Math.floor((y - G.y0) / G.cell);
   if (i < 0 || j < 0 || i >= G.nx || j >= G.ny) return null;
@@ -376,6 +684,26 @@ function spansAt(x, y, out) {
   return out;
 }
 const overlaps = (sp, a, b) => { for (let n = 0; n < sp.length; n += 2) if (sp[n] < b && sp[n + 1] > a) return true; return false; };
+let gridDirty = false;
+function rebuildGrid() {
+  const list = staticSolids.concat([...items.values()].filter(it => it.c).map(itemSolid));
+  const r = buildGrid(G, list);
+  grid = r.levels; spans = r.spans; G.L = r.L; G.K = r.K;
+  walkArea = r.reach * cellArea;
+  gridDirty = false;
+  // if a prop now stands where the player was, step to the nearest free spot (or back to the door)
+  levelsAt(st.x, st.y, lv);
+  if (!lv.some(h => Math.abs(h - st.z) <= STEP)) {
+    for (let rr = 10; rr <= 300; rr += 10) {
+      for (let a = 0; a < 360; a += 15) {
+        const x = st.x + rr * Math.cos(a * D2R), y = st.y + rr * Math.sin(a * D2R);
+        const h = levelsAt(x, y, lv).find(h => Math.abs(h - st.z) <= STEP);
+        if (h !== undefined) { st.x = x; st.y = y; st.z = st.rz = h; return; }
+      }
+    }
+    respawn();
+  }
+}
 
 const STEP = data.player.step, HEIGHT = 2 * data.player.half, GRAVITY = 1400, JUMP_V = 430;
 const WALK = 230, RUN = 430;
@@ -387,7 +715,6 @@ function respawn(saved) {
   st.rz = st.z; st.vx = st.vy = st.vz = 0; st.grounded = true;
   camYaw = s ? s.yaw : 0; st.face = camYaw + Math.PI;
 }
-
 const lv = [], spb = [];
 function tryStep(nx, ny) {
   levelsAt(nx, ny, lv);
@@ -406,20 +733,18 @@ function tryStep(nx, ny) {
   st.x = nx; st.y = ny;
   return true;
 }
-
 function physics(dt, wishX, wishY, running, jump) {
   const speed = running ? RUN : WALK;
   const accel = st.grounded ? 12 : 3;
   st.vx += (wishX * speed - st.vx) * Math.min(1, accel * dt);
   st.vy += (wishY * speed - st.vy) * Math.min(1, accel * dt);
   if (jump && st.grounded) { st.grounded = false; st.vz = JUMP_V; }
-  // horizontal, in small sub-steps, x and y separately so walls slide
   const dx = st.vx * dt, dy = st.vy * dt;
   const n = Math.max(1, Math.ceil(Math.max(Math.abs(dx), Math.abs(dy)) / 4));
   for (let k = 0; k < n; k++) {
     if (!tryStep(st.x + dx / n, st.y + dy / n)) {
-      if (!tryStep(st.x + dx / n, st.y)) { st.vx *= 0.5; }
-      if (!tryStep(st.x, st.y + dy / n)) { st.vy *= 0.5; }
+      if (!tryStep(st.x + dx / n, st.y)) st.vx *= 0.5;
+      if (!tryStep(st.x, st.y + dy / n)) st.vy *= 0.5;
     }
   }
   if (!st.grounded) {
@@ -428,7 +753,7 @@ function physics(dt, wishX, wishY, running, jump) {
     st.z += st.vz * dt;
     const sp = spansAt(st.x, st.y, spb);
     let land = null;
-    if (sp) for (let n = 1; n < sp.length; n += 2) if (sp[n] <= z0 + 2 && sp[n] >= st.z && (land === null || sp[n] > land)) land = sp[n];
+    if (sp) for (let k = 1; k < sp.length; k += 2) if (sp[k] <= z0 + 2 && sp[k] >= st.z && (land === null || sp[k] > land)) land = sp[k];
     if (land !== null && st.vz <= 0) { st.z = land; st.vz = 0; st.grounded = true; }
     else if (sp && st.vz > 0 && overlaps(sp, z0 + HEIGHT, st.z + HEIGHT)) { st.z = z0; st.vz = 0; }   // head bump
     else if (!sp || !sp.length || st.z < -1500) respawn();
@@ -436,41 +761,10 @@ function physics(dt, wishX, wishY, running, jump) {
   st.rz += (st.z - st.rz) * Math.min(1, dt * (st.grounded ? 18 : 60));
 }
 
-// ---------------------------------------------------------------- input
+// ---------------------------------------------------------------- modes: 'menu' | 'play' | 'edit'
+let mode = 'menu', locked = false, jumpQueued = false, touchRun = false;
 const keys = new Set();
-let jumpQueued = false, locked = false, playing = false, touchRun = false;
 const stick = { x: 0, y: 0, id: null };
-addEventListener('keydown', e => {
-  if (!playing) return;
-  keys.add(e.code);
-  if (e.code === 'Space') { jumpQueued = true; e.preventDefault(); }
-  if (e.code === 'KeyR') respawn();
-  if (e.code.startsWith('Arrow')) e.preventDefault();
-});
-addEventListener('keyup', e => keys.delete(e.code));
-addEventListener('blur', () => keys.clear());
-
-const look = (dx, dy, k) => {
-  camYaw -= dx * k;
-  camPitch = Math.max(-0.45, Math.min(1.25, camPitch + dy * k));
-};
-document.addEventListener('mousemove', e => { if (locked) look(e.movementX, e.movementY, 0.0024); });
-let drag = null;
-const cvs = renderer.domElement;
-cvs.addEventListener('pointerdown', e => {
-  if (!playing) return;
-  if (e.pointerType === 'mouse' && !locked) requestLock();
-  drag = { id: e.pointerId, x: e.clientX, y: e.clientY };
-});
-cvs.addEventListener('pointermove', e => {
-  if (!drag || drag.id !== e.pointerId || locked) return;
-  look(e.clientX - drag.x, e.clientY - drag.y, e.pointerType === 'mouse' ? 0.005 : 0.006);
-  drag.x = e.clientX; drag.y = e.clientY;
-});
-const endDrag = e => { if (drag && drag.id === e.pointerId) drag = null; };
-cvs.addEventListener('pointerup', endDrag);
-cvs.addEventListener('pointercancel', endDrag);
-cvs.addEventListener('wheel', e => { camDist = Math.max(1.2, Math.min(7, camDist * (1 + Math.sign(e.deltaY) * 0.1))); e.preventDefault(); }, { passive: false });
 
 function requestLock() {
   if (touchUI || !cvs.requestPointerLock) return;
@@ -479,10 +773,92 @@ function requestLock() {
 document.addEventListener('pointerlockchange', () => {
   const was = locked;
   locked = document.pointerLockElement === cvs;
-  if (was && !locked && playing) pause();
+  if (was && !locked && mode === 'play') pause();
 });
+function toast(msg, ms = 2600) {
+  $('toast').textContent = msg;
+  $('toast').hidden = false;
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => { $('toast').hidden = true; }, ms);
+}
+function begin() {
+  if (gridDirty) {
+    toast('Updating where you can walk…', 1500);
+    setTimeout(() => { rebuildGrid(); begin(); }, 40);
+    return;
+  }
+  mode = 'play';
+  $('start').hidden = true;
+  $('editor').hidden = true;
+  $('hud').hidden = false;
+  $('hint').hidden = touchUI;
+  $('touch').hidden = !touchUI;
+  $('modebtn').hidden = false;
+  $('modebtn').textContent = 'Edit hall';
+  select(null);
+  requestLock();
+}
+function pause() {
+  mode = 'menu';
+  keys.clear();
+  $('starttitle').textContent = 'Paused';
+  $('startcrest').textContent = 'Leafy Manor';
+  $('startsub').textContent = 'The mouse is free. Click Resume to keep exploring, or edit the hall.';
+  $('go').textContent = 'Resume';
+  $('start').hidden = false;
+  $('hint').hidden = true;
+  $('modebtn').hidden = true;
+}
+$('go').addEventListener('click', begin);
+$('goedit').addEventListener('click', () => enterEdit());
+$('modebtn').addEventListener('click', () => (mode === 'edit' ? begin() : enterEdit()));
+if (touchUI) {
+  $('keys').innerHTML = '<div><b><kbd>Stick</kbd></b>Move</div><div><b><kbd>Drag</kbd></b>Look around</div><div><b><kbd>Run</kbd></b>Toggle running</div><div><b><kbd>Jump</kbd></b>Jump</div>';
+}
 
-// touch: joystick, run toggle, jump
+// ---------------------------------------------------------------- play input
+addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('input, select, textarea')) return;
+  if (e.code === 'Tab' && mode !== 'menu') { e.preventDefault(); mode === 'edit' ? begin() : enterEdit(); return; }
+  if (mode === 'play') {
+    keys.add(e.code);
+    if (e.code === 'Space') { jumpQueued = true; e.preventDefault(); }
+    if (e.code === 'KeyR') respawn();
+    if (e.code.startsWith('Arrow')) e.preventDefault();
+  } else if (mode === 'edit') editKey(e);
+});
+addEventListener('keyup', e => keys.delete(e.code));
+addEventListener('blur', () => keys.clear());
+
+const look = (dx, dy, k) => {
+  camYaw -= dx * k;
+  camPitch = Math.max(-0.45, Math.min(1.25, camPitch + dy * k));
+};
+document.addEventListener('mousemove', e => { if (locked && mode === 'play') look(e.movementX, e.movementY, 0.0024); });
+let drag = null;
+cvs.addEventListener('pointerdown', e => {
+  if (mode === 'edit') return editDown(e);
+  if (mode !== 'play') return;
+  if (e.pointerType === 'mouse' && !locked) requestLock();
+  drag = { id: e.pointerId, x: e.clientX, y: e.clientY };
+});
+cvs.addEventListener('pointermove', e => {
+  if (mode === 'edit') return editMove(e);
+  if (!drag || drag.id !== e.pointerId || locked) return;
+  look(e.clientX - drag.x, e.clientY - drag.y, e.pointerType === 'mouse' ? 0.005 : 0.006);
+  drag.x = e.clientX; drag.y = e.clientY;
+});
+const endPointer = e => { if (mode === 'edit') return editUp(e); if (drag && drag.id === e.pointerId) drag = null; };
+cvs.addEventListener('pointerup', endPointer);
+cvs.addEventListener('pointercancel', endPointer);
+cvs.addEventListener('contextmenu', e => { if (mode === 'edit') e.preventDefault(); });
+cvs.addEventListener('wheel', e => {
+  e.preventDefault();
+  const k = 1 + Math.sign(e.deltaY) * 0.1;
+  if (mode === 'edit') ed.dist = Math.max(2, Math.min(40, ed.dist * k));
+  else camDist = Math.max(1.2, Math.min(7, camDist * k));
+}, { passive: false });
+
 const knob = $('knob'), stickEl = $('stick');
 function stickMove(e) {
   const r = stickEl.getBoundingClientRect();
@@ -500,28 +876,323 @@ stickEl.addEventListener('pointercancel', stickEnd);
 $('jump').addEventListener('pointerdown', e => { jumpQueued = true; e.preventDefault(); });
 $('run').addEventListener('click', () => { touchRun = !touchRun; $('run').setAttribute('aria-pressed', String(touchRun)); });
 
-// ---------------------------------------------------------------- screens
-function begin() {
-  playing = true;
-  $('start').hidden = true;
-  $('hud').hidden = false;
-  $('hint').hidden = touchUI;
-  $('touch').hidden = !touchUI;
-  requestLock();
-}
-function pause() {
-  playing = false;
+// ---------------------------------------------------------------- editor
+const ed = { target: new THREE.Vector3(), yaw: 0, pitch: 0.95, dist: 11 };
+let selected = null, gesture = null;
+const pointers = new Map();
+const selBox = new THREE.BoxHelper(undefined, 0xd9ac56);
+selBox.visible = false;
+scene.add(selBox);
+const history = [];
+
+function enterEdit() {
+  mode = 'edit';
   keys.clear();
-  $('starttitle').textContent = 'Paused';
-  $('startcrest').textContent = 'Leafy Manor';
-  $('startsub').textContent = 'The mouse is free. Click Resume to keep exploring.';
-  $('go').textContent = 'Resume';
-  $('start').hidden = false;
+  if (document.pointerLockElement) document.exitPointerLock();
+  ed.target.set(player.position.x, player.position.y, player.position.z);
+  ed.yaw = camYaw;
+  $('start').hidden = true;
+  $('hud').hidden = true;
   $('hint').hidden = true;
+  $('touch').hidden = true;
+  $('editor').hidden = false;
+  $('modebtn').hidden = false;
+  $('modebtn').textContent = 'Play';
+  refreshPanel();
 }
-$('go').addEventListener('click', begin);
-if (touchUI) {
-  $('keys').innerHTML = '<div><b><kbd>Stick</kbd></b>Move</div><div><b><kbd>Drag</kbd></b>Look around</div><div><b><kbd>Run</kbd></b>Toggle running</div><div><b><kbd>Jump</kbd></b>Jump</div>';
+function select(it) {
+  selected = it;
+  selBox.visible = !!it;
+  if (it) selBox.setFromObject(it.obj);
+  if (mode === 'edit') refreshPanel();
+}
+function refreshPanel() {
+  $('selnone').hidden = !!selected;
+  $('selinfo').hidden = !selected;
+  if (selected) {
+    const kids = family(selected).length - 1;
+    $('selname').textContent = nice(selected.m);
+    $('sellabel').textContent = selected.l + (kids ? ` · moves with ${kids} item${kids > 1 ? 's' : ''} on it` : '');
+  }
+  const e = currentEdits(), n = Object.keys(e.moved).length + e.deleted.length + e.added.length;
+  $('changecount').textContent = n ? `${Object.keys(e.moved).length} moved · ${e.added.length} added · ${e.deleted.length} deleted` : 'No changes yet.';
+  $('undo').disabled = !history.length;
+  $('walkinfo').textContent = gridDirty ? 'Where you can walk updates when you press Play.'
+    : `Walkable floor: ${walkArea.toFixed(0)} m²` + (walkArea < baseArea - 5 ? ` (${(baseArea - walkArea).toFixed(0)} m² less than the original layout: check nothing blocks a doorway, stair or the balcony).` : '.');
+}
+function pushHistory() {
+  history.push([...items.values()].map(defOf));
+  if (history.length > 100) history.shift();
+}
+function restore(defs) {
+  for (const it of [...items.values()]) removeItem(it);
+  for (const d of defs) createItem(d);
+  select(null);
+}
+function changed() {
+  gridDirty = true;
+  if (selected) selBox.setFromObject(selected.obj);
+  refreshPanel();
+  scheduleSave();
+}
+
+// picking and dragging on the canvas
+const ndc = new THREE.Vector2(), hitPoint = new THREE.Vector3(), plane = new THREE.Plane();
+function setRay(e) {
+  const r = cvs.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  ray.far = Infinity;
+}
+function pickItem(e) {
+  setRay(e);
+  const hit = ray.intersectObjects(itemRoot.children, true)[0];
+  for (let o = hit && hit.object; o; o = o.parent) if (o.userData.label) return items.get(o.userData.label) || null;
+  return null;
+}
+function planeHit(e, y) {
+  setRay(e);
+  plane.set(new THREE.Vector3(0, 1, 0), -y);
+  return ray.ray.intersectPlane(plane, hitPoint) ? hitPoint.clone() : null;
+}
+function editDown(e) {
+  cvs.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pointers.size === 2) {
+    const [a, b] = [...pointers.values()];
+    gesture = { kind: 'pinch', d0: Math.hypot(a.x - b.x, a.y - b.y), dist0: ed.dist };
+    return;
+  }
+  if (e.button === 2 || e.button === 1 || (e.button === 0 && e.shiftKey)) { gesture = { kind: 'pan', x: e.clientX, y: e.clientY }; return; }
+  const it = pickItem(e);
+  if (it) {
+    select(it);
+    const hit = planeHit(e, it.obj.position.y);
+    gesture = { kind: 'move', it, x0: e.clientX, y0: e.clientY, moved: false,
+      off: hit ? [it.obj.position.x - hit.x, it.obj.position.z - hit.z] : [0, 0] };
+  } else gesture = { kind: 'orbit', x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, moved: false };
+}
+function editMove(e) {
+  if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (!gesture) {
+    if (e.pointerType === 'mouse') cvs.style.cursor = pickItem(e) ? 'grab' : 'default';
+    return;
+  }
+  if (gesture.kind === 'pinch') {
+    if (pointers.size < 2) return;
+    const [a, b] = [...pointers.values()];
+    ed.dist = Math.max(2, Math.min(40, gesture.dist0 * gesture.d0 / Math.max(10, Math.hypot(a.x - b.x, a.y - b.y))));
+  } else if (gesture.kind === 'orbit') {
+    ed.yaw -= (e.clientX - gesture.x) * 0.006;
+    ed.pitch = Math.max(0.12, Math.min(1.5, ed.pitch + (e.clientY - gesture.y) * 0.006));
+    gesture.x = e.clientX; gesture.y = e.clientY;
+    if (Math.hypot(e.clientX - gesture.x0, e.clientY - gesture.y0) > 4) gesture.moved = true;
+  } else if (gesture.kind === 'pan') {
+    const k = ed.dist * 0.0016, dx = e.clientX - gesture.x, dy = e.clientY - gesture.y;
+    const s = Math.sin(ed.yaw), c = Math.cos(ed.yaw);
+    ed.target.x += -c * dx * k - s * dy * k;
+    ed.target.z += s * dx * k - c * dy * k;
+    gesture.x = e.clientX; gesture.y = e.clientY;
+  } else if (gesture.kind === 'move') {
+    const it = gesture.it;
+    if (!gesture.moved) {
+      if (Math.hypot(e.clientX - gesture.x0, e.clientY - gesture.y0) < 4) return;
+      gesture.moved = true;
+      pushHistory();
+      cvs.style.cursor = 'grabbing';
+    }
+    const hit = planeHit(e, it.obj.position.y);
+    if (!hit) return;
+    const nx = -(hit.z + gesture.off[1]) * 100, ny = (hit.x + gesture.off[0]) * 100;
+    const dx = nx - it.x, dy = ny - it.y;
+    for (const f of family(it)) { f.x += dx; f.y += dy; placeItem(f); }
+    selBox.setFromObject(it.obj);
+  }
+}
+function editUp(e) {
+  pointers.delete(e.pointerId);
+  if (!gesture) return;
+  if (gesture.kind === 'move' && gesture.moved) changed();
+  if (gesture.kind === 'orbit' && !gesture.moved) select(null);
+  if (gesture.kind === 'pinch' && pointers.size) return;
+  gesture = null;
+  cvs.style.cursor = 'default';
+}
+
+function turnSelected(deg) {
+  if (!selected) return;
+  pushHistory();
+  const p = selected, a = deg * D2R, c = Math.cos(a), s = Math.sin(a);
+  for (const f of family(p)) {
+    if (f !== p) {
+      const dx = f.x - p.x, dy = f.y - p.y;
+      f.x = p.x + dx * c - dy * s; f.y = p.y + dx * s + dy * c;
+    }
+    f.yaw = ((f.yaw + deg + 540) % 360) - 180;
+    placeItem(f);
+  }
+  changed();
+}
+function deleteSelected() {
+  if (!selected) return;
+  pushHistory();
+  for (const f of family(selected)) removeItem(f);
+  select(null);
+  changed();
+}
+function uniqueLabel(mesh) {
+  const base = 'Added_' + mesh.replace(/^SM_LM_/, '').replace(/_\d+$/, '');
+  let n = 1;
+  while (items.has(`${base}_${n}`) || ORIGINAL.some(d => d.l === `${base}_${n}`)) n++;
+  return `${base}_${n}`;
+}
+function addModel(mesh, x, y, z, yaw) {
+  const c = catalog[mesh];
+  return createItem({ l: uniqueLabel(mesh), m: mesh, x, y, z, yaw, s: [1, 1, 1], b: c.b, o: c.o, c: c.c, sh: 'box', su: 0, par: null, orig: null });
+}
+function duplicateSelected() {
+  if (!selected || !catalog[selected.m]) return toast('This one can’t be duplicated.');
+  pushHistory();
+  const p = selected, w = p.b[0] + 30;           // the copy goes beside the original, along its width
+  const it = addModel(p.m, p.x + Math.cos(p.yaw * D2R) * w, p.y + Math.sin(p.yaw * D2R) * w, p.z, p.yaw);
+  it.s = p.s.slice(); it.b = p.b.slice(); it.o = p.o.slice(); it.sh = p.sh;
+  placeItem(it);
+  select(it);
+  changed();
+}
+function addFromPanel() {
+  const mesh = $('addmodel').value, c = catalog[mesh];
+  if (!c) return;
+  pushHistory();
+  const floor = $('addfloor').value === '1' ? data.dims.z_gallery : 0;
+  const hangs = c.o[2] < 0;                     // banners, chandeliers: pivot at the top
+  const z = floor + (hangs ? c.b[2] + 40 : 0);
+  const x = -ed.target.z * 100, y = ed.target.x * 100;
+  const it = addModel(mesh, x, y, z, ((90 - ed.yaw / D2R) % 360 + 540) % 360 - 180);   // front faces the camera
+  select(it);
+  changed();
+  toast(`Added ${nice(mesh)}. Drag it where you want it.`);
+}
+function undo() {
+  if (!history.length) return;
+  restore(history.pop());
+  changed();
+}
+function editKey(e) {
+  const k = e.code;
+  if ((e.ctrlKey || e.metaKey) && k === 'KeyZ') { e.preventDefault(); return undo(); }
+  if ((e.ctrlKey || e.metaKey) && k === 'KeyD') { e.preventDefault(); return duplicateSelected(); }
+  if (k === 'KeyQ') return turnSelected(-15);
+  if (k === 'KeyE') return turnSelected(15);
+  if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); return deleteSelected(); }
+  if (k === 'Escape') return select(null);
+  if (/^(Key[WASD]|Arrow)/.test(k)) { e.preventDefault(); keys.add(k); }
+}
+$('turnL').addEventListener('click', () => turnSelected(-15));
+$('turnR').addEventListener('click', () => turnSelected(15));
+$('dup').addEventListener('click', duplicateSelected);
+$('del').addEventListener('click', deleteSelected);
+$('addbtn').addEventListener('click', addFromPanel);
+$('undo').addEventListener('click', undo);
+$('addmodel').innerHTML = Object.keys(catalog).sort((a, b) => nice(a).localeCompare(nice(b)))
+  .map(m => `<option value="${m}">${nice(m)}</option>`).join('');
+let resetArmed = null;
+$('reset').addEventListener('click', () => {
+  if (!resetArmed) {
+    $('reset').textContent = 'Click again to reset';
+    resetArmed = setTimeout(() => { resetArmed = null; $('reset').textContent = 'Reset all'; }, 4000);
+    return;
+  }
+  clearTimeout(resetArmed); resetArmed = null; $('reset').textContent = 'Reset all';
+  pushHistory();
+  restore(ORIGINAL);
+  changed();
+  toast('Back to the original layout. Undo brings your changes back.');
+});
+$('copy').addEventListener('click', () => {
+  const text = JSON.stringify(currentEdits(), null, 1);
+  const box = $('copybox');
+  const fallback = () => { box.value = text; box.hidden = false; box.focus(); box.select(); toast('Select all and copy the text below.'); };
+  try {
+    navigator.clipboard.writeText(text).then(() => toast('Changes copied. Paste them to Claude.'), fallback);
+  } catch (err) { fallback(); }
+});
+
+// ---------------------------------------------------------------- saving (artifact db, else this browser)
+const LSKEY = 'leafy-manor-edits';
+let db = null, dbChecked = false, saveTimer = null, saveChain = Promise.resolve(), readOnly = false;
+const r1 = v => Math.round(v * 10) / 10;
+function currentEdits() {
+  const moved = {}, added = [];
+  for (const it of items.values()) {
+    const cur = { x: r1(it.x), y: r1(it.y), z: r1(it.z), yaw: r1(it.yaw) };
+    if (!it.orig) { added.push({ label: it.l, mesh: it.m, ...cur }); continue; }
+    const o = it.orig, dyaw = Math.abs(((it.yaw - o.yaw) % 360 + 540) % 360 - 180);
+    if (Math.hypot(it.x - o.x, it.y - o.y, it.z - o.z) > 0.5 || dyaw > 0.5) moved[it.l] = cur;
+  }
+  const deleted = ORIGINAL.filter(d => !items.has(d.l)).map(d => d.l);
+  return { moved, deleted, added };
+}
+function applyEdits(e) {
+  let any = false;
+  for (const [l, m] of Object.entries(e.moved || {})) {
+    const it = items.get(l);
+    if (!it) continue;
+    Object.assign(it, { x: m.x, y: m.y, z: m.z, yaw: m.yaw });
+    placeItem(it);
+    any = true;
+  }
+  for (const l of e.deleted || []) { const it = items.get(l); if (it) { removeItem(it); any = true; } }
+  for (const a of e.added || []) {
+    if (items.has(a.label) || !catalog[a.mesh]) continue;
+    const c = catalog[a.mesh];
+    createItem({ l: a.label, m: a.mesh, x: a.x, y: a.y, z: a.z, yaw: a.yaw, s: [1, 1, 1], b: c.b, o: c.o, c: c.c, sh: 'box', su: 0, par: null, orig: null });
+    any = true;
+  }
+  return any;
+}
+function setStatus(text, kind = '') {
+  $('savestate').textContent = text;
+  $('savestate').className = 'small' + (kind ? ' ' + kind : '');
+}
+function idleStatus() {
+  if (readOnly) return setStatus('You can try changes here, but only the hall’s owner can save them.', 'bad');
+  if (db) setStatus('All changes saved. To put them in Unreal, tell Claude “apply my hall edits”.');
+  else setStatus('Changes are saved in this browser. To put them in Unreal, click Copy changes and paste them to Claude.');
+}
+function scheduleSave() {
+  setStatus('Saving…', 'busy');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(save, 700);
+}
+function save() {
+  const e = currentEdits();
+  try { localStorage.setItem(LSKEY, JSON.stringify(e)); } catch (err) { /* private window: db or nothing */ }
+  if (!db || readOnly) return idleStatus();
+  saveChain = saveChain.then(async () => {
+    try {
+      await db.doc('layout/edits').set({ ...e, savedAt: new Date().toISOString() });
+      idleStatus();
+    } catch (err) {
+      if (err && err.code === 'invalid_argument') { readOnly = true; idleStatus(); }
+      else setStatus('Could not save just now; your changes are kept in this browser and will save with your next change.', 'bad');
+    }
+  });
+}
+async function loadSaved() {
+  let e = null;
+  try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (err) { db = null; }
+  if (db) {
+    try { const s = await db.doc('layout/edits').get(); if (s.exists) e = s.data(); } catch (err) { /* fall back below */ }
+  }
+  if (!e) { try { e = JSON.parse(localStorage.getItem(LSKEY) || 'null'); } catch (err) { e = null; } }
+  dbChecked = true;
+  if (e && !history.length && applyEdits(e)) {
+    rebuildGrid();
+    if (selected) selBox.setFromObject(selected.obj);
+  }
+  idleStatus();
+  if (mode === 'edit') refreshPanel();
 }
 
 // ---------------------------------------------------------------- where am I
@@ -546,27 +1217,31 @@ function frame() {
   const dt = Math.min(0.05, clock.getDelta());
   const t = clock.elapsedTime;
 
-  // input -> wish direction in three.js space, relative to the camera
   let f = 0, r = 0;
-  if (playing) {
+  if (mode !== 'menu') {
     if (keys.has('KeyW') || keys.has('ArrowUp')) f += 1;
     if (keys.has('KeyS') || keys.has('ArrowDown')) f -= 1;
     if (keys.has('KeyD') || keys.has('ArrowRight')) r += 1;
     if (keys.has('KeyA') || keys.has('ArrowLeft')) r -= 1;
-    f -= stick.y; r += stick.x;
   }
+  if (mode === 'play') { f -= stick.y; r += stick.x; }
   const len = Math.hypot(f, r);
   if (len > 1) { f /= len; r /= len; }
-  const sy = Math.sin(camYaw), cy = Math.cos(camYaw);
-  const wx3 = -sy * f + cy * r, wz3 = -cy * f - sy * r;          // three.js x / z
+  const yawNow = mode === 'edit' ? ed.yaw : camYaw;
+  const sy = Math.sin(yawNow), cy = Math.cos(yawNow);
+  const wx3 = -sy * f + cy * r, wz3 = -cy * f - sy * r;          // three.js x / z, relative to the camera
   const running = keys.has('ShiftLeft') || keys.has('ShiftRight') || touchRun;
-  physics(dt, -wz3, wx3, running, jumpQueued && playing);        // UE x = -three z, UE y = three x
+  if (mode === 'edit') {
+    const sp = ed.dist * 0.9 * dt;
+    ed.target.x += wx3 * sp; ed.target.z += wz3 * sp;
+    physics(dt, 0, 0, false, false);
+  } else physics(dt, -wz3, wx3, running, jumpQueued && mode === 'play');   // UE x = -three z, UE y = three x
   jumpQueued = false;
 
   // character
   const hs = Math.hypot(st.vx, st.vy);
   if (hs > 15) {
-    const target = Math.atan2(st.vy / 100, -st.vx / 100);          // facing in three.js: atan2(x, z)
+    const target = Math.atan2(st.vy, -st.vx);
     let d = target - st.face;
     d = Math.atan2(Math.sin(d), Math.cos(d));
     st.face += d * Math.min(1, dt * 12);
@@ -586,19 +1261,24 @@ function frame() {
   if (acts.Run) acts.Run.timeScale = Math.max(0.8, hs / 260);
   mixer.update(dt);
 
-  // camera: orbit, pulled in by walls
-  pivot.set(player.position.x, player.position.y + 0.8, player.position.z);
-  dir.set(Math.sin(camYaw) * Math.cos(camPitch), Math.sin(camPitch), Math.cos(camYaw) * Math.cos(camPitch));
-  ray.set(pivot, dir);
-  ray.far = camDist + 0.3;
-  const hit = ray.intersectObjects(camBoxes, false)[0];
-  const dist = hit ? Math.max(0.35, hit.distance - 0.25) : camDist;
-  camPos.copy(pivot).addScaledVector(dir, dist);
-  camera.position.lerp(camPos, playing ? Math.min(1, dt * 14) : 1);
-  if (!playing && !$('start').hidden && $('go').textContent !== 'Resume') camYaw += dt * 0.05;
-  camera.lookAt(pivot);
+  // camera
+  if (mode === 'edit') {
+    dir.set(Math.sin(ed.yaw) * Math.cos(ed.pitch), Math.sin(ed.pitch), Math.cos(ed.yaw) * Math.cos(ed.pitch));
+    camera.position.copy(ed.target).addScaledVector(dir, ed.dist);
+    camera.lookAt(ed.target);
+  } else {
+    pivot.set(player.position.x, player.position.y + 0.8, player.position.z);
+    dir.set(Math.sin(camYaw) * Math.cos(camPitch), Math.sin(camPitch), Math.cos(camYaw) * Math.cos(camPitch));
+    ray.set(pivot, dir);
+    ray.far = camDist + 0.3;
+    const hit = ray.intersectObjects(camBoxes, false)[0];
+    const dist = hit ? Math.max(0.35, hit.distance - 0.25) : camDist;
+    camPos.copy(pivot).addScaledVector(dir, dist);
+    camera.position.lerp(camPos, mode === 'play' ? Math.min(1, dt * 14) : 1);
+    if (mode === 'menu' && $('go').textContent !== 'Resume') camYaw += dt * 0.05;
+    camera.lookAt(pivot);
+  }
 
-  // flicker
   for (const s of flames) {
     const u = s.userData;
     const k = u.slow ? 1 + 0.06 * Math.sin(t * 1.3) : 1 + 0.12 * Math.sin(t * 11 + u.seed) + 0.07 * Math.sin(t * 23.7 + u.seed * 3);
@@ -606,8 +1286,7 @@ function frame() {
   }
   for (const l of lamps) if (l.userData.flicker) l.intensity = l.userData.base * (1 + 0.15 * Math.sin(t * 9) + 0.08 * Math.sin(t * 21));
 
-  // HUD
-  if (playing) {
+  if (mode === 'play') {
     const p = placeName();
     if (p !== lastPlace) { $('place').textContent = lastPlace = p; }
     $('level').textContent = (st.rz > D.z_gallery - 60 ? 'Balcony level' : st.rz > 40 ? 'Stairs' : 'Ground floor') + ' · ' + (st.rz / 100).toFixed(1) + ' m';
@@ -616,15 +1295,13 @@ function frame() {
   requestAnimationFrame(frame);
 }
 
-function start(saved) {
-  respawn(saved);
-  camPos.set(0, 0, 0);
-  $('loader').hidden = true;
-  $('start').hidden = false;
-  window.claude?.hot?.snapshot?.(() => ({ pos: [st.x, st.y, st.z], yaw: camYaw }));
-  requestAnimationFrame(frame);
-}
-window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+respawn();
+camPos.set(0, 0, 0);
+$('loader').hidden = true;
+$('start').hidden = false;
+requestAnimationFrame(frame);
+loadSaved();
+if (location.hash === '#test') window.__lm = { items, ed, st, camera, get mode() { return mode; }, currentEdits, get walkArea() { return walkArea; }, get selected() { return selected; } };
 </script>
 </body>
 </html>

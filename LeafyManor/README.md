@@ -20,6 +20,14 @@ These previews are browser (three.js) renders of the exact layout and models. Th
 * **Run it locally:** it must be served, because opening `index.html` directly won't load the models. Run `cd LeafyManor/Web && python3 -m http.server 8000`, then open http://localhost:8000.
 * **Controls:** WASD to move, mouse to look, Shift to run, Space to jump, the mouse wheel for camera distance and R to return to the entrance. Phones get an on-screen joystick.
 * **Collision:** it uses the same walkability data as `Tools/validate_blockout.py`.
+* **Editing the hall:** press **Edit hall** (or Tab) to move props and furniture around.
+  * Drag a model to move it. **Q** and **E** turn it; there are also Duplicate, Delete and Add buttons.
+  * Things sitting on a model move with it, such as cushions on a sofa.
+  * Walls and stairs stay fixed.
+  * When you press **Play**, the game works out again where you can walk.
+* **Saving your edits:** online they save automatically; in a local copy they save in your browser. To make them permanent, tell Claude "apply my hall edits", or click **Copy changes** and paste them to Claude. They are saved to `Unreal/Python/leafy_manor_edits.json`.
+  * The Unreal build script, the checker and the browser game all read that file.
+  * Delete the file to go back to the original layout.
 * **Rebuilding:** after a layout or model change, rebuild it with `Tools/WebWalkthrough/build_web.sh`. The settings are listed at the top of that script.
 
 ## Build it in Unreal

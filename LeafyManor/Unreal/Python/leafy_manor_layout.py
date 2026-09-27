@@ -19,7 +19,9 @@ Plan (north up):
     south corners: globe / chess table / chests, vestibule + PlayerStart to the south
 """
 
+import json
 import math
+import os
 
 try:
     from leafy_manor_kit import KIT
@@ -618,7 +620,40 @@ def build_design():
     _corners(L)
     _under_galleries(L)
     _lights_dressing(L)
+    _apply_edits(L)
     return L.prims
+
+
+# ---------------------------------------------------------------------------
+# Edits from the browser editor (LeafyManor/Web, "Edit hall")
+# ---------------------------------------------------------------------------
+EDITS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "leafy_manor_edits.json")
+
+
+def _apply_edits(L, path=EDITS_FILE):
+    """Apply moved / deleted / added props saved by the browser editor.
+
+    Positions are final centimetres and `yaw` is the actor yaw in degrees, so the file is absolute and
+    applying it twice changes nothing. Delete the file to go back to the authored layout.
+    """
+    if not os.path.exists(path):
+        return
+    with open(path) as f:
+        edits = json.load(f)
+    s = LM_SCALE
+    moved, deleted = edits.get("moved", {}), set(edits.get("deleted", ()))
+    for p in L.prims:
+        m = moved.get(p.label)
+        if m and p.mesh:
+            p.pivot = p.center = (m["x"] / s, m["y"] / s, m["z"] / s)
+            p.rot = (p.rot[0], float(m["yaw"]), p.rot[2])
+    L.prims = [p for p in L.prims if p.label not in deleted]
+    L._labels -= deleted
+    for a in edits.get("added", ()):
+        if a.get("mesh") in KIT and a.get("label") not in L._labels:
+            folder = "Furniture" if KIT[a["mesh"]]["category"] == "Furniture" else "Props"
+            L.kit(a["label"], a["mesh"], a["x"] / s, a["y"] / s, a["z"] / s, yaw=float(a["yaw"]),
+                  folder=folder + "/Added")
 
 
 def build(scale=None):
