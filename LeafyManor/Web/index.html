@@ -424,7 +424,41 @@ function onBytes(key, loaded) {
   $('pct').textContent = Math.round(f * 100) + '%';
 }
 const loader = new GLTFLoader();
-const loadGLTF = (url, key) => new Promise((res, rej) => loader.load(url, res, e => onBytes(key, e.loaded), rej));
+async function fetchText(url, key) {           // our own fetch, so the loading bar can follow it
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(url + ': HTTP ' + res.status);
+  const reader = res.body.getReader(), chunks = [];
+  let got = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value); got += value.length; onBytes(key, got);
+  }
+  return new Blob(chunks).text();
+}
+function base64Bytes(b64) {
+  const s = atob(b64), out = new Uint8Array(s.length);
+  for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
+  return out;
+}
+// The model files keep their geometry as base64 inside the glTF JSON. Hosts that forbid fetching
+// data: URLs would refuse GLTFLoader's own buffer load, so repack the file as an in-memory GLB.
+async function loadGLTF(url, key) {
+  const j = JSON.parse(await fetchText(url, key));
+  const uri = j.buffers[0].uri || '';
+  const bin = base64Bytes(uri.slice(uri.indexOf(',') + 1));
+  delete j.buffers[0].uri;
+  const enc = new TextEncoder().encode(JSON.stringify(j));
+  const jsonLen = Math.ceil(enc.length / 4) * 4, binLen = Math.ceil(bin.length / 4) * 4;
+  const glb = new Uint8Array(12 + 8 + jsonLen + 8 + binLen), dv = new DataView(glb.buffer);
+  dv.setUint32(0, 0x46546C67, true); dv.setUint32(4, 2, true); dv.setUint32(8, glb.length, true);
+  dv.setUint32(12, jsonLen, true); dv.setUint32(16, 0x4E4F534A, true);
+  glb.set(enc, 20); glb.fill(0x20, 20 + enc.length, 20 + jsonLen);
+  dv.setUint32(20 + jsonLen, binLen, true); dv.setUint32(24 + jsonLen, 0x004E4942, true);
+  glb.set(bin, 28 + jsonLen);
+  const base = new URL('.', new URL(url, location.href)).href;
+  return new Promise((res, rej) => loader.parse(glb.buffer, base, res, rej));
+}
 const loadImage = url => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
 async function gunzip16(b64) {
   const bin = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
