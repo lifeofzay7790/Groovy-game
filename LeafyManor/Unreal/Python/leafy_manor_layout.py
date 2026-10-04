@@ -451,6 +451,9 @@ def _lounge(L, sy):
     L.kit("LoungeChair" + t, "SM_LM_Chair_01", LOUNGE_X, cy - sy * 250, 0, face + 180.0, folder=F)
     L.kit("LoungeOttoman" + t, "SM_LM_Ottoman_Purple_01", LOUNGE_X + 330, wall - sy * 120, 0, face, folder=F)
     L.kit("UpperBanner" + t, "SM_LM_Banner_Red_01", 0, wall, 1420, face, collision="none", folder="Props/Banners")
+    # plants beside the hearth and along the wall towards the stairs
+    L.kit("PlantFireside" + t, "SM_LM_Plant_CrownPot_01", LOUNGE_X - 430, wall - sy * 110, 0, face, folder="Props/Plants")
+    L.kit("PlantWall" + t, "SM_LM_Plant_Potted_01", 260, wall - sy * 110, 0, face, folder="Props/Plants")
 
 
 def _corners(L):
@@ -499,6 +502,13 @@ def _under_galleries(L):
         for k, cy in enumerate((500.0, 1000.0)):
             L.kit("RailIvy%s%d" % (t, k), "SM_LM_Ivy_Hanging_0%d" % (k + 1), NORTH_GAL_X0, sy * cy, Z_GALLERY + 80, 180.0,
                   collision="none", folder="Props/Plants")
+        for k, cy in enumerate((250.0, 750.0)):
+            L.kit("RailIvy%s%d" % (t, k + 2), "SM_LM_Ivy_Hanging_0%d" % (2 - k), NORTH_GAL_X0, sy * cy, Z_GALLERY + 80,
+                  180.0, collision="none", folder="Props/Plants")
+        # ...and over the west / east gallery rails, facing into the hall
+        for k, cx in enumerate((700.0, 1000.0)):
+            L.kit("SideRailIvy%s%d" % (t, k), "SM_LM_Ivy_Hanging_0%d" % (k + 1), cx, sy * GAL_IN, Z_GALLERY + 80,
+                  -sy * 90.0, collision="none", folder="Props/Plants")
     L.kit("UpperBannerN", "SM_LM_Banner_Crown_01", HALF, 0, 1500, 180.0, collision="none", folder="Props/Banners")
     L.kit("VestibuleChest", "SM_LM_Crate_Crown_01", -2480, -480, 0, 45.0, folder="Furniture/Vestibule")
     L.kit("VestibulePlant", "SM_LM_Plant_Potted_01", -2480, 480, 0, -45.0, folder="Props/Plants")

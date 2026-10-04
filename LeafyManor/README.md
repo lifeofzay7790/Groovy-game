@@ -49,6 +49,30 @@ Re-running is safe: the script only replaces actors it created (tag `LM_Blockout
 | `REBUILD_MATERIALS` | `False` | `True` rebuilds the generated materials |
 | `ENABLE_NANITE` | `True` | Turns Nanite on for the kit meshes |
 | `SCONCE_LIGHTS` | `True` | Adds a small warm light at every wall sconce |
+| `MOOD` | `True` | The night, candlelit look from the master sheet (below). `False` gives the plain, evenly lit hall |
+
+### Mood (the master-sheet look)
+
+With `MOOD = True` the build adds:
+
+* **Post-process:**
+  * Darker auto-exposure, stronger bloom and a vignette.
+  * Navy shadows and warm highlights.
+  * Lumen global illumination and reflections, so the polished floor mirrors the candles.
+* **Volumetric fog** (`Fog_LM_Haze`): the candles, chandeliers and fountain glow through a light haze.
+* **Lights:**
+  * Candle lights on every floor candelabra, table candelabra and lantern.
+  * Brighter fireplaces that flicker (light function `Lighting/M_LM_LF_Flicker`).
+  * A stronger blue fountain light, brighter sconces, and a dimmer sky and moon.
+* **Materials:**
+  * `M_LM_KitFX` makes flames, candle tips, the fire and the fountain water glow (with a gentle flicker). It also turns the purple, pink and red rugs and banners navy while keeping their gold.
+  * Per-model instances are in `Materials/Kit/FX`, set from `FX_MATERIALS`.
+  * The floor uses `M_LM_FloorMarble`, which is darker and almost mirror-polished.
+  * The cream walls and stairs are tinted darker.
+
+To tune the look, change the `MOOD_*` values at the top of the script and re-run. The glow and recolour amounts in `FX_MATERIALS` only apply when an instance is first created: to apply changed values, delete `Materials/Kit/FX` before re-running, or edit the instances directly in the editor. The fireplace flicker material is also only created once: to rebuild it, delete `Lighting/M_LM_LF_Flicker`.
+
+If the hall looks too dark or too bright, change `MOOD_EXPOSURE_EV` and `MOOD_EXPOSURE_BIAS`. The EV values assume the project setting **Extend default luminance range in Auto Exposure settings** is on, which is the UE5 default.
 
 The script writes only inside `/Game/LeafyManor/`. It never touches your character, controller, camera, GameMode or project settings.
 
@@ -62,7 +86,7 @@ The script writes only inside `/Game/LeafyManor/`. It never touches your charact
 * **South-west corner:** globe, treasure chest and plants.
 * **South-east corner:** chess table and chairs.
 * **Entrance:** crowned dogs flank the vestibule opening, and the vestibule is where you spawn.
-* **Dressing:** knights, busts, bookcases, clocks, banners, ivy, chandeliers and sconces.
+* **Dressing:** knights, busts, bookcases, clocks, banners, chandeliers and sconces. Ivy hangs over the north and side gallery rails, and potted plants flank each hearth.
 
 Collision:
 * **Walls and stairs:** hidden simple-collision stand-ins, plus a smooth invisible ramp on each stair.
