@@ -154,7 +154,7 @@ class _Layout:
             folder="Props", kind=None, **kw):
         """Place kit model `mesh` with its pivot at (x, y, z) du, its front facing `facing` (yaw deg)."""
         k = KIT[mesh]
-        W, D, H = (k["size"][i] * scale[i] for i in range(3))
+        W, D, H = (k.get("box", k["size"])[i] * scale[i] for i in range(3))   # collision footprint
         if collision is None:
             collision = "none" if k["collision"] == "none" else "block"
         kw.setdefault("mat", "Kit")
@@ -393,6 +393,8 @@ def _porch_and_exterior(L):
     kw = dict(collision="none", folder=E, shadow=False)
     L.box("Ext_Ground", -3000, 9500, -7000, 7000, -130, -110, mat="Ground", kind="ExtGround", **kw)
     L.kit("Ext_Fountain", "SM_LM_Fountain_01", 4700, 0, -110, 180.0, scale=(1.3, 1.3, 1.3), collision="none", folder=E)
+    L.kit("Ext_FountainWater", "SM_LM_FountainWater_01", 4700, 0, -110, 180.0, scale=(1.3, 1.3, 1.3), collision="none",
+          shadow=False, folder=E)
     L.kit("Ext_Backdrop", "SM_LM_Backdrop_CastleCliff_01", 7200, -900, -110, 180.0, collision="none", folder=E)
     L.kit("Ext_Moon", "SM_LM_Moon_01", 7300, 2600, 2400, 180.0, collision="none", folder=E)
     for sy, t in ((-1, "W"), (1, "E")):
@@ -412,24 +414,31 @@ def _porch_and_exterior(L):
 def _centre(L):
     fx, fy = FOUNTAIN
     L.kit("Fountain", "SM_LM_Fountain_01", fx, fy, 0, 180.0, shape="cyl", folder="Props/Fountain", step_up=False)
+    L.kit("FountainWater", "SM_LM_FountainWater_01", fx, fy, 0, 180.0, collision="none", shadow=False,
+          folder="Props/Fountain")
     for sy, t in ((-1, "W"), (1, "E")):
-        L.kit("Lion" + t, "SM_LM_LionStatue_01", fx - 350, sy * 600, 0, 180.0, folder="Props/Statues")
+        # crowned lions on marble pedestals, as on the master sheet
+        L.kit("LionPedestal" + t, "SM_LM_Pedestal_Grand_01", fx - 350, sy * 600, 0, 180.0, folder="Props/Statues")
+        L.kit("Lion" + t, "SM_LM_LionStatue_01", fx - 350, sy * 600, KIT["SM_LM_Pedestal_Grand_01"]["size"][2] / LM_SCALE,
+              180.0, scale=(0.75, 0.75, 0.75), folder="Props/Statues")
         L.kit("FountainCandelabra" + t, "SM_LM_Candelabra_Floor_01", fx - 440, sy * 760, 0, 180.0,
               folder="Props/Lighting")
     ring = [(15, "SM_LM_Plant_CrownPot_01"), (-15, "SM_LM_Plant_CrownPot_01"), (165, "SM_LM_Plant_Potted_01"),
-            (-165, "SM_LM_Plant_Potted_01"), (125, "SM_LM_Urn_Gold_01"), (-125, "SM_LM_Urn_Gold_01")]
+            (-165, "SM_LM_Plant_Potted_01"), (125, "SM_LM_Plant_FernUrn_01"), (-125, "SM_LM_Plant_FernUrn_01")]
     for i, (ang, mesh) in enumerate(ring):
         a = math.radians(ang)
         L.kit("FountainPlanter_%d" % (i + 1), mesh, fx + 540 * math.cos(a), fy + 540 * math.sin(a), 0, ang + 180.0,
               folder="Props/Plants")
-        if mesh.startswith("SM_LM_Urn"):
-            L.kit("FountainFern_%d" % (i + 1), "SM_LM_Plant_Fern_01", fx + 540 * math.cos(a), fy + 540 * math.sin(a), 95,
-                  ang, collision="none", folder="Props/Plants")
+    # tall palms framing the walkway and the foot of each staircase; lantern posts along the runner
+    for sy, t in ((-1, "W"), (1, "E")):
+        L.kit("PalmSouth" + t, "SM_LM_Plant_Palm_01", -1100, sy * 820, 0, 0.0, folder="Props/Plants")
+        L.kit("PalmStair" + t, "SM_LM_Plant_Palm_01", 250, sy * 850, 0, 180.0, folder="Props/Plants")
+        L.kit("LampPost" + t, "SM_LM_LampPost_01", -700, sy * 640, 0, -sy * 90.0, folder="Props/Lighting")
     # rugs + carpet runner along the N-S axis
     R = "Props/Rugs"
-    L.kit("Rug_South", "SM_LM_Rug_Leaf_01", -1100, 0, 0.2, 0.0, collision="none", folder=R)
-    L.kit("Rug_North", "SM_LM_Rug_Crown_01", 900, 0, 0.2, 180.0, collision="none", folder=R)
-    L.kit("Rug_Vestibule", "SM_LM_Rug_Crown_01", -2200, 0, 0.2, 0.0, collision="none", folder=R)
+    L.kit("Rug_South", "SM_LM_Rug_NavyLeaf_01", -1100, 0, 0.2, 0.0, collision="none", folder=R)
+    L.kit("Rug_North", "SM_LM_Rug_NavyCrown_01", 900, 0, 0.2, 180.0, collision="none", folder=R)
+    L.kit("Rug_Vestibule", "SM_LM_Rug_NavyCrown_01", -2200, 0, 0.2, 0.0, collision="none", folder=R)
     for i, x in enumerate((-430.0, -1800.0, 480.0, 1271.5, 1514.5, 1757.5, -2560.0)):
         L.kit("Runner_%d" % (i + 1), "SM_LM_Runner_01", x, 0, 0.5, 90.0, collision="none", folder=R)
 
@@ -443,16 +452,22 @@ def _lounge(L, sy):
     L.kit("FireplaceFire" + t, "SM_LM_Fire_01", LOUNGE_X, wall - sy * 60, 12, face, scale=(1.2, 0.8, 0.9),
           collision="none", folder="Props/Fireplaces")
     cy = wall - sy * 530
-    L.kit("LoungeRug" + t, "SM_LM_Rug_Lounge_01", LOUNGE_X, cy, 0.3, 0.0, collision="none", folder=F)
-    L.kit("LoungeTable" + t, "SM_LM_OrnateTable_01", LOUNGE_X, cy, 0, face, folder=F)
-    L.kit("LoungeCandles" + t, "SM_LM_Candelabra_Small_01", LOUNGE_X, cy, 84, face, collision="none", folder=F)
+    L.kit("LoungeRug" + t, "SM_LM_Rug_NavyCrown_01", LOUNGE_X, cy, 0.3, face, scale=(0.9, 0.9, 1.0), collision="none",
+          folder=F)
+    L.kit("LoungeTable" + t, "SM_LM_CoffeeTable_Ornate_01", LOUNGE_X, cy, 0, face, scale=(0.9, 0.9, 1.0), folder=F)
+    L.kit("LoungeCandles" + t, "SM_LM_Candle_Cluster_01", LOUNGE_X, cy, KIT["SM_LM_CoffeeTable_Ornate_01"]["size"][2] / LM_SCALE,
+          face, collision="none", folder=F)
+    L.kit("Painting" + t, "SM_LM_Painting_Castle_01", LOUNGE_X, wall, 690, face, scale=(1.4, 1.4, 1.4), collision="none",
+          folder="Props/Paintings")
     for side, u in ((-1, "S"), (1, "N")):
-        L.kit("LoungeSofa%s%s" % (t, u), "SM_LM_Sofa_01", LOUNGE_X + side * 235, cy, 0, 180.0 if side > 0 else 0.0, folder=F)
-        L.kit("LoungeCushion%s%s" % (t, u), "SM_LM_Cushion_Leaf_01", LOUNGE_X + side * 240, cy, 50,
-              180.0 if side > 0 else 0.0, collision="none", folder=F)
-    L.kit("LoungeChair" + t, "SM_LM_Chair_01", LOUNGE_X, cy - sy * 250, 0, face + 180.0, folder=F)
+        L.kit("LoungeSofa%s%s" % (t, u), "SM_LM_Sofa_Velvet_01", LOUNGE_X + side * 275, cy, 0, 180.0 if side > 0 else 0.0,
+              folder=F)
+    L.kit("LoungeChair" + t, "SM_LM_Armchair_Velvet_01", LOUNGE_X, cy - sy * 270, 0, face + 180.0, folder=F)
     L.kit("LoungeOttoman" + t, "SM_LM_Ottoman_Purple_01", LOUNGE_X + 330, wall - sy * 120, 0, face, folder=F)
-    L.kit("UpperBanner" + t, "SM_LM_Banner_Crown_01", 0, wall, 1420, face, collision="none", folder="Props/Banners")
+    L.kit("UpperBanner" + t, "SM_LM_Banner_GoodPlants_01" if sy < 0 else "SM_LM_Banner_HigherTogether_01", 0, wall, 1420,
+          face, collision="none", folder="Props/Banners")
+    # plants beside the hearth and along the wall towards the stairs
+    L.kit("PlantWall" + t, "SM_LM_Plant_Potted_01", 260, wall - sy * 110, 0, face, folder="Props/Plants")
 
 
 def _corners(L):
@@ -495,12 +510,28 @@ def _under_galleries(L):
               folder="Props/Statues")
         # front-arch knights and banners (ground floor, under the north gallery)
         L.kit("DoorKnight" + t, "SM_LM_KnightArmor_01", HALF - 45, sy * 300, 0, 180.0, folder="Props/Armor")
-        L.kit("DoorCandelabra" + t, "SM_LM_Candelabra_Floor_01", HALF - 40, sy * 560, 0, 180.0, folder="Props/Lighting")
+        L.kit("DoorCandelabra" + t, "SM_LM_Candelabra_Grand_01", HALF - 60, sy * 560, 0, 180.0, folder="Props/Lighting")
         L.kit("NorthBanner" + t, "SM_LM_Banner_Crown_01", HALF, sy * 800, 690, 180.0, collision="none", folder="Props/Banners")
-        # hanging greenery over the north rail
-        for k, cy in enumerate((500.0, 1000.0)):
-            L.kit("RailIvy%s%d" % (t, k), "SM_LM_Ivy_Hanging_0%d" % (k + 1), NORTH_GAL_X0, sy * cy, Z_GALLERY + 80, 180.0,
+        # ivy garlands swagged along the north rail (with RailGarlandN in the middle) and the west / east rails
+        for k, cy in enumerate((412.0, 824.0)):
+            L.kit("RailGarland%s%d" % (t, k), "SM_LM_Ivy_Garland_01", NORTH_GAL_X0, sy * cy, Z_GALLERY + 85, 180.0,
                   collision="none", folder="Props/Plants")
+        L.kit("SideRailGarland" + t, "SM_LM_Ivy_Garland_01", 901, sy * GAL_IN, Z_GALLERY + 85, -sy * 90.0, collision="none",
+              folder="Props/Plants")
+        # ferns hanging under the galleries, between the columns
+        for k, (fx_, fy_) in enumerate(((1625, sy * 675), (975, sy * 1625))):
+            L.kit("HangingFern%s%d" % (t, k), "SM_LM_Plant_HangingFern_01", fx_, fy_, Z_GALLERY - GALLERY_SLAB, 180.0,
+                  collision="none", folder="Props/Plants")
+        # tall candelabras either side of the foot of each staircase
+        for k, side in enumerate((1, -1)):
+            ox, oy = (163.0, -163.0) if side > 0 else (-163.0, 163.0)
+            L.kit("StairCandelabra%s%d" % (t, k), "SM_LM_Candelabra_Grand_01", 456 + ox, sy * (456 + oy), 0, 180.0,
+                  folder="Props/Lighting")
+        # crown vases beside the crowned dogs at the entrance
+        L.kit("EntranceVase" + t, "SM_LM_Vase_Crown_01", -HALF + 80, sy * 980, 0, 0.0, folder="Props/Decor")
+    L.kit("RailGarlandN", "SM_LM_Ivy_Garland_01", NORTH_GAL_X0, 0, Z_GALLERY + 85, 180.0, collision="none", folder="Props/Plants")
+    L.kit("HangingFernN", "SM_LM_Plant_HangingFern_01", 1625, 0, Z_GALLERY - GALLERY_SLAB, 180.0, collision="none",
+          folder="Props/Plants")
     L.kit("UpperBannerN", "SM_LM_Banner_Crown_01", HALF, 0, 1500, 180.0, collision="none", folder="Props/Banners")
     L.kit("VestibuleChest", "SM_LM_Crate_Crown_01", -2480, -480, 0, 45.0, folder="Furniture/Vestibule")
     L.kit("VestibulePlant", "SM_LM_Plant_Potted_01", -2480, 480, 0, -45.0, folder="Props/Plants")
@@ -543,7 +574,8 @@ def _lights_dressing(L):
         chain = 147.0 if zc == Z_CEIL else 0.0
         if chain:
             L.kit("Chain" + name, "SM_LM_Chain_01", x, y, zc, 0.0, scale=(1.5, 1.5, 1.0), collision="none", folder=C)
-        L.kit("Chandelier" + name, "SM_LM_Chandelier_01", x, y, zc - chain, 0.0, scale=(sc, sc, sc), collision="none", folder=C)
+        mesh = "SM_LM_Chandelier_Grand_01" if chain else "SM_LM_Chandelier_01"   # the 30-candle chandelier in the hall
+        L.kit("Chandelier" + name, mesh, x, y, zc - chain, 0.0, scale=(sc, sc, sc), collision="none", folder=C)
     S = "Props/Sconces"
     n = 0
     for wall, (axis, face, facing, span) in WALLS.items():

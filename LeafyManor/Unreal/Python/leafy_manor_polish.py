@@ -123,6 +123,9 @@ def apply(h,eas,prims,meshes):
             if 'Chandelier' in p.mesh or 'Chain' in p.mesh:
                 comp.set_cast_shadow(False)
             cloth=any(t in p.mesh for t in ('Banner','Rug','Runner','Sofa','Chair','Ottoman','Stair_Grand'))
+            # Authored navy and FX recolouring already preserve the gold details.
+            if 'Navy' in p.mesh or (h.MOOD and h.FX_MATERIALS.get(p.mesh, {}).get('RecolorAmount', 0)):
+                cloth=False
             stone=any(t in p.mesh for t in ('Wall_','Column_','StairStringer'))
             if cloth or stone:
                 for i in range(comp.get_num_materials()):
@@ -169,16 +172,20 @@ def apply(h,eas,prims,meshes):
         if 'Candle_Pillar' in p.mesh: locs=[(0,0,p.size[2]+3)]
         elif 'Candelabra' in p.mesh:
             locs=[(0,0,p.size[2]),(-p.size[0]*0.32,0,p.size[2]*0.9),(p.size[0]*0.32,0,p.size[2]*0.9)]
-            _light(h,eas,p.label,_local(p,0,0,p.size[2]+5),(1.0,0.5,0.16),22,280,flicker=flicker)
+            if not (h.MOOD and p.mesh in h.CANDLE_LIGHTS):
+                _light(h,eas,p.label,_local(p,0,0,p.size[2]+5),(1.0,0.5,0.16),22,280,flicker=flicker)
         elif 'WallSconce' in p.mesh: locs=[(0,20,23)]
         elif 'Chandelier' in p.mesh:
             locs=[(80*math.cos(a*math.tau/8),80*math.sin(a*math.tau/8),-160) for a in range(8)]
         elif p.mesh=='SM_LM_Fire_01':
             locs=[(-35,0,28),(0,0,38),(35,0,24)]
+        if h.MOOD and h.FX_MATERIALS.get(p.mesh, {}).get('GlowStrength', 0):
+            locs=[]  # The imported flame surfaces already glow and flicker.
         for i,local in enumerate(locs):
             size=(12,12,28) if 'Fire_01' in p.mesh else (3,3,9)
             _mesh(h,eas,meshes['sphere'],p.label+'Flame'+str(i),_local(p,*local),size,flame)
-        if p.mesh=='SM_LM_Fountain_01':
+        if p.mesh=='SM_LM_Fountain_01' and not any(
+                q.mesh=='SM_LM_FountainWater_01' and q.pivot==p.pivot for q in prims):
             _mesh(h,eas,meshes['cyl'],p.label+'Pool',_local(p,0,0,118),(310,310,1.2),water)
             # Thin segmented arcs descend from the upper bowl into the basin.
             for i in range(24):

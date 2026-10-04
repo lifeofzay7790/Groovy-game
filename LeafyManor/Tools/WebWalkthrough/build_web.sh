@@ -4,8 +4,10 @@
 #   KIT_OUT_DIR   the folder given to KitProcessing/process_pieces.py (holds _preview/*.glb)
 #   PLAYER_FBX / PLAYER_TEX   your character FBX and its base-colour texture
 # Needs Node for `npx gltfpack`.
+# To add only new models without the old previews, see add_web_models.sh.
 set -euo pipefail
 cd "$(dirname "$0")"
+rm -f build/kit2_raw.glb build/kit2.gltf build/kit2.bin ../../Web/kit2.json ../../Web/kit2_tex*.jpg   # all models go in kit.json
 "$BLENDER_PY" pack_kit.py "$KIT_OUT_DIR"
 "$BLENDER_PY" pack_char.py "$PLAYER_FBX" "$PLAYER_TEX"
 npx --yes gltfpack@1.2.0 -i build/kit_raw.glb -o build/kit.gltf -kn -km
