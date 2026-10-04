@@ -19,6 +19,7 @@ These previews are browser (three.js) renders of the exact layout and models. Th
 `Web/` is a browser version of the hall. You play as your character, using lighter copies of the models.
 * **Run it locally:** it must be served, because opening `index.html` directly won't load the models. Run `cd LeafyManor/Web && python3 -m http.server 8000`, then open http://localhost:8000.
 * **Controls:** WASD to move, mouse to look, Shift to run, Space to jump, the mouse wheel for camera distance and R to return to the entrance. Phones get an on-screen joystick.
+* **Day / Night:** the hall opens at night, candlelit like the master sheet, with glowing flames and water and reflections in the floor. Press **N** or the Day/Night button to switch; your choice is remembered.
 * **Collision:** it uses the same walkability data as `Tools/validate_blockout.py`.
 * **Editing the hall:** press **Edit hall** (or Tab) to move props and furniture around.
   * Drag a model to move it. **Q** and **E** turn it; there are also Duplicate, Delete and Add buttons.
@@ -29,6 +30,14 @@ These previews are browser (three.js) renders of the exact layout and models. Th
   * The Unreal build script, the checker and the browser game all read that file.
   * Delete the file to go back to the original layout.
 * **Rebuilding:** after a layout or model change, rebuild it with `Tools/WebWalkthrough/build_web.sh`. The settings are listed at the top of that script.
+
+## Quick start on Windows (double-click)
+
+In the repo folder:
+* **`Build Leafy Manor.bat`** opens your Unreal project and builds the level (it runs `leafy_manor_build.py` for you). Run it once, and again after you pull new changes. The level is left open, so you can press **Play** in the editor.
+* **`Play Leafy Manor.bat`** opens the level straight into play, in its own window. Close the game with Alt+F4.
+
+The first time, each launcher finds Unreal Engine 5 and your project. It looks in `Documents\Unreal Projects`; if it can't tell, it asks you to drag in `UnrealEditor.exe` or your `.uproject`. The answers are saved in `Unreal/local_paths.cfg`; delete that file to choose again. The project needs the **Python Editor Script Plugin** enabled, as in step 1 below.
 
 ## Build it in Unreal
 

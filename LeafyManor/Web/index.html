@@ -74,11 +74,12 @@
   .btn-ghost:hover { background: rgba(217, 172, 86, 0.12); }
   .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
-  #modebtn { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 16px); right: 16px; z-index: 4;
+  #modebtn, #lookbtn { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 16px); right: 16px; z-index: 4;
     font: 600 12px/1 var(--body); letter-spacing: 0.12em; text-transform: uppercase; padding: 11px 14px; cursor: pointer;
     color: var(--cream); background: var(--panel); border: 1px solid var(--line); }
-  #modebtn:hover { border-color: var(--gold); }
-  #modebtn:focus-visible, .ed button:focus-visible, .ed select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  #lookbtn { top: calc(env(safe-area-inset-top, 0px) + 60px); }
+  #modebtn:hover, #lookbtn:hover { border-color: var(--gold); }
+  #modebtn:focus-visible, #lookbtn:focus-visible, .ed button:focus-visible, .ed select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
   .ed { position: fixed; right: 16px; top: calc(env(safe-area-inset-top, 0px) + 64px); z-index: 4; width: 310px;
     max-height: calc(100% - 96px); overflow-y: auto; display: grid; gap: 16px; padding: 16px;
@@ -131,6 +132,7 @@
   <button id="jump" type="button">Jump</button>
 </div>
 <button id="modebtn" type="button" hidden>Edit hall</button>
+<button id="lookbtn" type="button" hidden>Day</button>
 <div id="toast" role="status" hidden></div>
 
 <aside class="ed" id="editor" aria-label="Hall editor" hidden>
@@ -212,6 +214,11 @@
 <script type="module">
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { Reflector } from 'three/addons/objects/Reflector.js';
 
 const $ = id => document.getElementById(id);
 const touchUI = matchMedia('(pointer: coarse)').matches;
@@ -402,9 +409,20 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x05070f);
 scene.fog = new THREE.FogExp2(0x0a0e1d, 0.011);
 const camera = new THREE.PerspectiveCamera(62, 1, 0.05, 250);
+// night look (the master sheet's candlelit hall): bloom on bright flames and water; mirror-like floor reflections
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.45, 0.4, 1.4);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+let floorMirror = null;
 function resize() {
   const w = innerWidth, h = innerHeight;
   renderer.setSize(w, h, false);
+  composer.setSize(w, h);
+  composer.setPixelRatio(renderer.getPixelRatio());
+  bloom.resolution.set(w / 2, h / 2);
+  if (floorMirror) floorMirror.getRenderTarget().setSize(Math.round(w * 0.5), Math.round(h * 0.5));
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
 }
@@ -457,6 +475,7 @@ const maxAniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 const kitScenes = [kitGltf, kit2Gltf].filter(Boolean).map(g => g.scene);
 for (const sc of kitScenes) sc.updateMatrixWorld(true);
 const protos = {};                           // mesh name -> [{geometry, material, rel}]
+const wallMats = [];
 {
   const named = {};
   for (const sc of kitScenes) sc.traverse(o => { if (o.name.startsWith('SM_LM_') && !named[o.name]) named[o.name] = o; });
@@ -467,6 +486,7 @@ const protos = {};                           // mesh name -> [{geometry, materia
       if (!o.isMesh) return;
       if (!seenMats.has(o.material)) {
         seenMats.add(o.material);
+        if (/door_set/.test(o.material.name)) wallMats.push(o.material);
         o.material.metalness = 0; o.material.roughness = 0.62;
         if (o.material.map) o.material.map.anisotropy = maxAniso;
       }
@@ -530,6 +550,7 @@ function paletteMat(key) {
   m.emissive.setRGB(d[3][0] * d[4], d[3][1] * d[4], d[3][2] * d[4]);
   return (palette[key] = m);
 }
+let hallFloor = null;
 for (const b of data.boxes) {
   const mesh = new THREE.Mesh(geos[b.s] || geos.box);
   mesh.matrixAutoUpdate = false;
@@ -541,6 +562,7 @@ for (const b of data.boxes) {
     t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = maxAniso;
     t.repeat.set(sx / 272, sz / 272);
     mesh.material = new THREE.MeshStandardMaterial({ map: t, roughness: 0.28 });
+    if (b.l === 'Floor_Hall') hallFloor = mesh;
   } else mesh.material = paletteMat(b.m);
   scene.add(mesh);
 }
@@ -553,7 +575,8 @@ for (const b of data.boxes) {
 }
 
 // ---------------------------------------------------------------- lights + flames
-scene.add(new THREE.HemisphereLight(0xffe2c0, 0x2a2438, 0.7));
+const hemi = new THREE.HemisphereLight(0xffe2c0, 0x2a2438, 0.7);
+scene.add(hemi);
 const moon = new THREE.DirectionalLight(0x8ca6ff, 0.5);
 moon.position.copy(toThree(2600, -700, 2400));
 scene.add(moon);
@@ -561,7 +584,7 @@ const S2 = 0.68 * 0.68;
 const lamps = data.lights.map(l => {
   const pl = new THREE.PointLight(new THREE.Color().setRGB(...l.c), l.i * S2 * 1.2, l.d * 1.3, 2);
   pl.position.fromArray(l.p);
-  pl.userData.base = pl.intensity;
+  pl.userData.base = pl.userData.day = pl.intensity;
   pl.userData.flicker = /Fireplace/.test(l.l);
   scene.add(pl);
   return pl;
@@ -594,11 +617,69 @@ function addFlame(pos, size, mat = flameMat, slow = false) {
 for (const f of data.flames) addFlame(new THREE.Vector3(f[0], f[1], f[2]), f[3]);
 // flames that belong to movable props: [mesh pattern, offset in the model's own frame (cm, front = +Y), size]
 const PROP_FLAMES = [
-  [/WallSconce/, [0, 22, 48], 0.5], [/Candelabra_Floor/, [0, 0, 132], 0.7], [/Candelabra_Small/, [0, 0, 56], 0.35],
-  [/Fire_01/, [0, 0, 35], 1.6], [/Lantern/, [0, 0, 30], 0.5], [/LampPost/, [0, 0, 135], 0.6],
-  [/Candelabra_Grand/, [0, 0, 195], 0.9], [/Candle_Cluster/, [0, 0, 50], 0.5], [/Chandelier_Grand/, [0, 0, -150], 3.2],
-  [/Fountain_01/, [0, 0, 140], 4.2, true],
+  [/WallSconce/, [0, 22, 48], 0.5], [/Candelabra_Floor/, [0, 0, 132], 0.7, false, 30], [/Candelabra_Small/, [0, 0, 56], 0.35],
+  [/Fire_01/, [0, 0, 35], 1.6], [/Lantern/, [0, 0, 30], 0.5], [/LampPost/, [0, 0, 135], 0.6, false, 35],
+  [/Candelabra_Grand/, [0, 0, 195], 0.9, false, 45], [/Candle_Cluster/, [0, 0, 50], 0.5, false, 20],
+  [/Chandelier_Grand/, [0, 0, -150], 2.2], [/Fountain_01/, [0, 0, 140], 4.2, true],
 ];
+
+// ---------------------------------------------------------------- day / night look
+const propLights = new Set();
+const sky = { night: true };
+try { sky.night = localStorage.getItem('lm-look') !== 'day'; } catch (e) { /* storage blocked: default night */ }
+function applyLook() {
+  const n = sky.night;
+  renderer.toneMappingExposure = n ? 1.1 : 0.92;
+  hemi.color.set(n ? 0x7a86b8 : 0xffe2c0);
+  hemi.groundColor.set(n ? 0x1a120c : 0x2a2438);
+  hemi.intensity = n ? 0.07 : 0.7;
+  moon.intensity = n ? 0.12 : 0.5;
+  for (const l of lamps) l.userData.base = l.userData.day * (n ? 0.2 : 1);   // pools of light, not a lit room
+  for (const l of lamps) l.intensity = l.userData.base;
+  for (const l of propLights) l.visible = n;
+  scene.fog.color.set(n ? 0x08070b : 0x0a0e1d);
+  scene.fog.density = n ? 0.018 : 0.011;
+  flameMat.color.setScalar(n ? 1.4 : 1);
+  waterMat.color.setScalar(n ? 0.9 : 1);
+  waterSurfaceMat.color.setScalar(n ? 1.0 : 1);
+  for (const m of wallMats) m.color.setRGB(...(n ? [0.62, 0.58, 0.56] : [1, 1, 1]));   // same tint as Unreal's MOOD
+  bloom.enabled = n;
+  if (floorMirror) floorMirror.visible = n;
+  $('lookbtn').textContent = n ? 'Day' : 'Night';
+  $('lookbtn').setAttribute('aria-label', n ? 'Switch to daylight' : 'Switch to candlelit night');
+}
+if (hallFloor && !touchUI) {                 // additive mirror pass over the hall floor (candles reflect in the marble)
+  const p = new THREE.Vector3(), q = new THREE.Quaternion(), sc = new THREE.Vector3();
+  hallFloor.matrix.decompose(p, q, sc);
+  floorMirror = new Reflector(new THREE.PlaneGeometry(sc.x, sc.z), {
+    textureWidth: Math.round(innerWidth * 0.5), textureHeight: Math.round(innerHeight * 0.5), clipBias: 0.003,
+    shader: {
+      name: 'FloorMirror',
+      uniforms: { color: { value: null }, tDiffuse: { value: null }, textureMatrix: { value: null }, strength: { value: 0.3 } },
+      vertexShader: `uniform mat4 textureMatrix; varying vec4 vUv;
+        #include <common>
+        #include <logdepthbuf_pars_vertex>
+        void main() { vUv = textureMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        #include <logdepthbuf_vertex>
+        }`,
+      fragmentShader: `uniform sampler2D tDiffuse; uniform float strength; varying vec4 vUv;
+        #include <logdepthbuf_pars_fragment>
+        void main() {
+        #include <logdepthbuf_fragment>
+        gl_FragColor = vec4(texture2DProj(tDiffuse, vUv).rgb * strength, 1.0); }`,
+    },
+  });
+  Object.assign(floorMirror.material, { transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+  floorMirror.rotation.x = -Math.PI / 2;
+  floorMirror.position.set(p.x, p.y + sc.y / 2 + 0.002, p.z);   // under the rugs (they sit 1-13 mm up)
+  scene.add(floorMirror);
+}
+function toggleLook() {
+  sky.night = !sky.night;
+  try { localStorage.setItem('lm-look', sky.night ? 'night' : 'day'); } catch (e) { /* not saved */ }
+  applyLook();
+}
+$('lookbtn').addEventListener('click', toggleLook);
 
 // ---------------------------------------------------------------- camera collision boxes (walls, floors, stairs)
 const camBoxes = data.cam.map(arr => {
@@ -627,7 +708,7 @@ function placeItem(it) {
   it.obj.rotation.set(0, (90 - it.yaw) * D2R, 0);
   it.obj.scale.set(it.s[0], it.s[2], it.s[1]);
   it.obj.updateMatrixWorld(true);
-  for (const f of it.fx) toThree(...localToWorld(it, f.local), f.sprite.position);
+  for (const f of it.fx) toThree(...localToWorld(it, f.local), (f.sprite || f.light).position);
 }
 function createItem(def) {
   const it = { ...def, s: def.s.slice(), b: def.b.slice(), o: def.o.slice(), fx: [] };
@@ -639,8 +720,17 @@ function createItem(def) {
     mesh.matrix.copy(part.rel);
     it.obj.add(mesh);
   }
-  for (const [re, local, size, water] of PROP_FLAMES) {
-    if (re.test(it.m)) it.fx.push({ local, sprite: addFlame(new THREE.Vector3(), size, water ? waterMat : flameMat, !!water) });
+  for (const [re, local, size, water, cd] of PROP_FLAMES) {
+    if (!re.test(it.m)) continue;
+    it.fx.push({ local, sprite: addFlame(new THREE.Vector3(), size, water ? waterMat : flameMat, !!water) });
+    if (cd && !touchUI) {                      // warm light at the flame (night only)
+      const light = new THREE.PointLight(0xffa860, cd, 9, 2);
+      light.userData.base = cd;
+      light.visible = sky.night;
+      scene.add(light);
+      propLights.add(light);
+      it.fx.push({ local: [local[0], local[1], local[2] + 10], light });
+    }
   }
   itemRoot.add(it.obj);
   items.set(it.l, it);
@@ -649,7 +739,7 @@ function createItem(def) {
 }
 function removeItem(it) {
   itemRoot.remove(it.obj);
-  for (const f of it.fx) { scene.remove(f.sprite); flames.delete(f.sprite); }
+  for (const f of it.fx) { scene.remove(f.sprite || f.light); flames.delete(f.sprite); propLights.delete(f.light); }
   items.delete(it.l);
   if (selected === it) select(null);
 }
@@ -658,6 +748,7 @@ const defOf = it => ({ l: it.l, m: it.m, x: it.x, y: it.y, z: it.z, yaw: it.yaw,
 const ORIGINAL = data.items.map(d => ({ l: d.l, m: d.m, x: d.p[0], y: d.p[1], z: d.p[2], yaw: d.yaw, s: d.s, b: d.b, o: d.o,
   c: d.c, sh: d.sh, su: d.su, par: d.par, orig: { x: d.p[0], y: d.p[1], z: d.p[2], yaw: d.yaw } }));
 for (const d of ORIGINAL) createItem(d);
+applyLook();
 const children = it => [...items.values()].filter(c => c.par === it.l);
 const family = it => [it, ...children(it).flatMap(family)];
 
@@ -815,6 +906,7 @@ function begin() {
   $('hint').hidden = touchUI;
   $('touch').hidden = !touchUI;
   $('modebtn').hidden = false;
+  $('lookbtn').hidden = false;
   $('modebtn').textContent = 'Edit hall';
   select(null);
   requestLock();
@@ -829,6 +921,7 @@ function pause() {
   $('start').hidden = false;
   $('hint').hidden = true;
   $('modebtn').hidden = true;
+  $('lookbtn').hidden = true;
 }
 $('go').addEventListener('click', begin);
 $('goedit').addEventListener('click', () => enterEdit());
@@ -841,6 +934,7 @@ if (touchUI) {
 addEventListener('keydown', e => {
   if (e.target.closest && e.target.closest('input, select, textarea')) return;
   if (e.code === 'Tab' && mode !== 'menu') { e.preventDefault(); mode === 'edit' ? begin() : enterEdit(); return; }
+  if (e.code === 'KeyN' && !e.ctrlKey && !e.metaKey) { toggleLook(); return; }
   if (mode === 'play') {
     keys.add(e.code);
     if (e.code === 'Space') { jumpQueued = true; e.preventDefault(); }
@@ -918,6 +1012,7 @@ function enterEdit() {
   $('touch').hidden = true;
   $('editor').hidden = false;
   $('modebtn').hidden = false;
+  $('lookbtn').hidden = false;
   $('modebtn').textContent = 'Play';
   refreshPanel();
 }
@@ -1313,7 +1408,7 @@ function frame() {
     if (p !== lastPlace) { $('place').textContent = lastPlace = p; }
     $('level').textContent = (st.rz > D.z_gallery - 60 ? 'Balcony level' : st.rz > 40 ? 'Stairs' : 'Ground floor') + ' · ' + (st.rz / 100).toFixed(1) + ' m';
   }
-  renderer.render(scene, camera);
+  composer.render();
   requestAnimationFrame(frame);
 }
 
@@ -1323,7 +1418,7 @@ $('loader').hidden = true;
 $('start').hidden = false;
 requestAnimationFrame(frame);
 loadSaved();
-if (location.hash === '#test') window.__lm = { items, ed, st, camera, get mode() { return mode; }, currentEdits, get walkArea() { return walkArea; }, get selected() { return selected; } };
+if (location.hash === '#test') window.__lm = { items, ed, st, camera, bloom, floorMirror, renderer, propLights, lamps, hemi, get mode() { return mode; }, currentEdits, get walkArea() { return walkArea; }, get selected() { return selected; } };
 </script>
 </body>
 </html>
