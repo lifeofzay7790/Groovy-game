@@ -1,6 +1,6 @@
 # Leafy Manor Model Kit (from your Tripo sheets)
 
-Your 9 FBX "kit sheets" and the ornate-furniture GLB were split into separate pieces, scaled to game size for the 97.8 cm character, given pivots and
+Your 9 FBX "kit sheets" and the ornate-furniture and ornate-decor GLBs were split into separate pieces, scaled to game size for the 97.8 cm character, given pivots and
 simple collision, and exported one FBX per model into `LeafyManor/Models/`. Everything is reproducible with
 `Tools/KitProcessing/` (Blender 4.5 as a Python module).
 
@@ -22,7 +22,7 @@ simple collision, and exported one FBX per model into `LeafyManor/Models/`. Ever
 ## Still missing
 Nothing from the original list. (The ornamental-statues upload added knights, lions, dogs, busts, clocks, fireplaces and the chandelier.)
 
-## Models (99)
+## Models (107)
 
 | Model | Folder | Used for | Size W × D × H (cm) | Triangles | Collision | Source (your file, piece) |
 |---|---|---|---|---|---|---|
@@ -120,6 +120,14 @@ Nothing from the original list. (The ornamental-statues upload added knights, li
 | `SM_LM_Armchair_Velvet_01` | Furniture | Lounge wingback armchairs | 86.8 × 73.9 × 100 | 30k | box | ornate furniture GLB P03 |
 | `SM_LM_Pedestal_Grand_01` | Props | Marble pedestals under the fountain lions | 79 × 80.3 × 100 | 20k | box | ornate furniture GLB P02 |
 | `SM_LM_LampPost_01` | Props | Lantern posts along the walkway (lit) | 57 × 56.7 × 180 | 20k | box | ornate furniture GLB P01 |
+| `SM_LM_Chandelier_Grand_01` | Props | 30-candle chandeliers over the hall (fountain, south, north) | 260 × 265.2 × 297.8 | 60k | none | ornate decor GLB P02 |
+| `SM_LM_Candelabra_Grand_01` | Props | Tall 7-candle candelabras (stair feet, front arch) | 87.4 × 90.3 × 200 | 30k | base only (50 × 50 × 200) | ornate decor GLB P04 |
+| `SM_LM_Painting_Castle_01` | Props | Moonlit castle painting above each fireplace | 150 × 9.4 × 115.1 | 30k | none | ornate decor GLB P08 |
+| `SM_LM_Ivy_Garland_01` | Props | Ivy swags along the gallery rails | 280 × 79.1 × 183.2 | 30k | none | ornate decor GLB P07 |
+| `SM_LM_Plant_HangingFern_01` | Props | Ferns hanging under the galleries | 116.9 × 114 × 150.2 | 40k | none | ornate decor GLB P03 |
+| `SM_LM_Candle_Cluster_01` | Props | Pillar candles on a gold tray (lounge tables) | 60 × 62 × 54.3 | 20k | none | ornate decor GLB P01 |
+| `SM_LM_CoffeeTable_Ornate_01` | Furniture | Round lounge tables | 120 × 118.7 × 50.2 | 30k | box | ornate decor GLB P05 |
+| `SM_LM_Vase_Crown_01` | Props | Crown vases beside the entrance dogs | 73.9 × 61.2 × 120 | 25k | box | ornate decor GLB P06 |
 | `SM_LM_Banner_GoodPlants_01` | Props | West upper wall banner, "GOOD PLANTS BETTER PEOPLE" | 264 × 13 × 394.5 | 5k | none | built by `build_crafted.py` |
 | `SM_LM_Banner_HigherTogether_01` | Props | East upper wall banner, "HIGHER TOGETHER" | 264 × 13 × 394.5 | 5k | none | built by `build_crafted.py` |
 | `SM_LM_Rug_NavyLeaf_01` | Props | Navy and gold leaf rug, south of the fountain | 740 × 680 × 1.2 | <1k | none | built by `build_crafted.py` |

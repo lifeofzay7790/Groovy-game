@@ -22,7 +22,7 @@ if NEW_ONLY:
     have = {n.get('name') for n in json.load(open(os.path.join(REPO, 'Web', 'kit.json')))['nodes']}
     used = [m for m in used if m not in have]
 TEX_SRC = REPO + '/Models/Textures'
-TEX_SIZE = {'door_set': 2048, 'Architecture': 2048, 'Ornate_furniture': 2048, 'Crafted': 2048}
+TEX_SIZE = {'door_set': 2048, 'Architecture': 2048, 'Ornate_furniture': 2048, 'Ornate_decor': 2048, 'Crafted': 2048}
 TARGET = {'SM_LM_Fountain_01': 16000, 'SM_LM_StairBalustrade_01': 14000, 'SM_LM_Stair_Grand_01': 999999,
           'SM_LM_Runner_01': 999999, 'SM_LM_LionStatue_01': 9000, 'SM_LM_Backdrop_CastleCliff_01': 7000}
 for w in ('Plain', 'Window', 'Arch', 'DoorSingle', 'DoorDouble'):
@@ -30,6 +30,8 @@ for w in ('Plain', 'Window', 'Arch', 'DoorSingle', 'DoorDouble'):
 TARGET.update({'SM_LM_Cornice_01': 1800, 'SM_LM_Balustrade_01': 2500})
 TARGET.update({'SM_LM_Plant_Palm_01': 12000, 'SM_LM_Plant_FernUrn_01': 12000, 'SM_LM_Sofa_Velvet_01': 8000,
                'SM_LM_Armchair_Velvet_01': 7000})
+TARGET.update({'SM_LM_Chandelier_Grand_01': 14000, 'SM_LM_Ivy_Garland_01': 9000, 'SM_LM_Plant_HangingFern_01': 9000,
+               'SM_LM_Candelabra_Grand_01': 6000, 'SM_LM_Painting_Castle_01': 3000})
 TARGET.update({m: 999999 for m in ('SM_LM_Banner_GoodPlants_01', 'SM_LM_Banner_HigherTogether_01', 'SM_LM_FountainWater_01')})
 
 bpy.ops.wm.read_factory_settings(use_empty=True)

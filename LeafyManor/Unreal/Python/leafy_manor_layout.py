@@ -452,10 +452,13 @@ def _lounge(L, sy):
     cy = wall - sy * 400
     L.kit("LoungeRug" + t, "SM_LM_Rug_NavyCrown_01", LOUNGE_X, cy, 0.3, face, scale=(0.9, 0.9, 1.0), collision="none",
           folder=F)
-    L.kit("LoungeTable" + t, "SM_LM_OrnateTable_01", LOUNGE_X, cy, 0, face, folder=F)
-    L.kit("LoungeCandles" + t, "SM_LM_Candelabra_Small_01", LOUNGE_X, cy, 84, face, collision="none", folder=F)
+    L.kit("LoungeTable" + t, "SM_LM_CoffeeTable_Ornate_01", LOUNGE_X, cy, 0, face, scale=(0.9, 0.9, 1.0), folder=F)
+    L.kit("LoungeCandles" + t, "SM_LM_Candle_Cluster_01", LOUNGE_X, cy, KIT["SM_LM_CoffeeTable_Ornate_01"]["size"][2] / LM_SCALE,
+          face, collision="none", folder=F)
+    L.kit("Painting" + t, "SM_LM_Painting_Castle_01", LOUNGE_X, wall, 690, face, scale=(1.4, 1.4, 1.4), collision="none",
+          folder="Props/Paintings")
     for side, u in ((-1, "S"), (1, "N")):
-        L.kit("LoungeSofa%s%s" % (t, u), "SM_LM_Sofa_Velvet_01", LOUNGE_X + side * 250, cy, 0, 180.0 if side > 0 else 0.0,
+        L.kit("LoungeSofa%s%s" % (t, u), "SM_LM_Sofa_Velvet_01", LOUNGE_X + side * 275, cy, 0, 180.0 if side > 0 else 0.0,
               folder=F)
     L.kit("LoungeChair" + t, "SM_LM_Armchair_Velvet_01", LOUNGE_X, cy - sy * 270, 0, face + 180.0, folder=F)
     L.kit("LoungeOttoman" + t, "SM_LM_Ottoman_Purple_01", LOUNGE_X + 330, wall - sy * 120, 0, face, folder=F)
@@ -506,19 +509,28 @@ def _under_galleries(L):
               folder="Props/Statues")
         # front-arch knights and banners (ground floor, under the north gallery)
         L.kit("DoorKnight" + t, "SM_LM_KnightArmor_01", HALF - 45, sy * 300, 0, 180.0, folder="Props/Armor")
-        L.kit("DoorCandelabra" + t, "SM_LM_Candelabra_Floor_01", HALF - 40, sy * 560, 0, 180.0, folder="Props/Lighting")
+        L.kit("DoorCandelabra" + t, "SM_LM_Candelabra_Grand_01", HALF - 60, sy * 560, 0, 180.0, folder="Props/Lighting")
         L.kit("NorthBanner" + t, "SM_LM_Banner_Crown_01", HALF, sy * 800, 690, 180.0, collision="none", folder="Props/Banners")
-        # hanging greenery over the north rail
-        for k, cy in enumerate((500.0, 1000.0)):
-            L.kit("RailIvy%s%d" % (t, k), "SM_LM_Ivy_Hanging_0%d" % (k + 1), NORTH_GAL_X0, sy * cy, Z_GALLERY + 80, 180.0,
+        # ivy garlands swagged along the north rail (with RailGarlandN in the middle) and the west / east rails
+        for k, cy in enumerate((412.0, 824.0)):
+            L.kit("RailGarland%s%d" % (t, k), "SM_LM_Ivy_Garland_01", NORTH_GAL_X0, sy * cy, Z_GALLERY + 85, 180.0,
                   collision="none", folder="Props/Plants")
-        for k, cy in enumerate((250.0, 750.0)):
-            L.kit("RailIvy%s%d" % (t, k + 2), "SM_LM_Ivy_Hanging_0%d" % (2 - k), NORTH_GAL_X0, sy * cy, Z_GALLERY + 80,
-                  180.0, collision="none", folder="Props/Plants")
-        # ...and over the west / east gallery rails, facing into the hall
-        for k, cx in enumerate((700.0, 1000.0)):
-            L.kit("SideRailIvy%s%d" % (t, k), "SM_LM_Ivy_Hanging_0%d" % (k + 1), cx, sy * GAL_IN, Z_GALLERY + 80,
-                  -sy * 90.0, collision="none", folder="Props/Plants")
+        L.kit("SideRailGarland" + t, "SM_LM_Ivy_Garland_01", 901, sy * GAL_IN, Z_GALLERY + 85, -sy * 90.0, collision="none",
+              folder="Props/Plants")
+        # ferns hanging under the galleries, between the columns
+        for k, (fx_, fy_) in enumerate(((1625, sy * 675), (975, sy * 1625))):
+            L.kit("HangingFern%s%d" % (t, k), "SM_LM_Plant_HangingFern_01", fx_, fy_, Z_GALLERY - GALLERY_SLAB, 180.0,
+                  collision="none", folder="Props/Plants")
+        # tall candelabras either side of the foot of each staircase
+        for k, side in enumerate((1, -1)):
+            ox, oy = (163.0, -163.0) if side > 0 else (-163.0, 163.0)
+            L.kit("StairCandelabra%s%d" % (t, k), "SM_LM_Candelabra_Grand_01", 456 + ox, sy * (456 + oy), 0, 180.0,
+                  folder="Props/Lighting")
+        # crown vases beside the crowned dogs at the entrance
+        L.kit("EntranceVase" + t, "SM_LM_Vase_Crown_01", -HALF + 80, sy * 980, 0, 0.0, folder="Props/Decor")
+    L.kit("RailGarlandN", "SM_LM_Ivy_Garland_01", NORTH_GAL_X0, 0, Z_GALLERY + 85, 180.0, collision="none", folder="Props/Plants")
+    L.kit("HangingFernN", "SM_LM_Plant_HangingFern_01", 1625, 0, Z_GALLERY - GALLERY_SLAB, 180.0, collision="none",
+          folder="Props/Plants")
     L.kit("UpperBannerN", "SM_LM_Banner_Crown_01", HALF, 0, 1500, 180.0, collision="none", folder="Props/Banners")
     L.kit("VestibuleChest", "SM_LM_Crate_Crown_01", -2480, -480, 0, 45.0, folder="Furniture/Vestibule")
     L.kit("VestibulePlant", "SM_LM_Plant_Potted_01", -2480, 480, 0, -45.0, folder="Props/Plants")
@@ -531,7 +543,8 @@ def _lights_dressing(L):
         chain = 147.0 if zc == Z_CEIL else 0.0
         if chain:
             L.kit("Chain" + name, "SM_LM_Chain_01", x, y, zc, 0.0, scale=(1.5, 1.5, 1.0), collision="none", folder=C)
-        L.kit("Chandelier" + name, "SM_LM_Chandelier_01", x, y, zc - chain, 0.0, scale=(sc, sc, sc), collision="none", folder=C)
+        mesh = "SM_LM_Chandelier_Grand_01" if chain else "SM_LM_Chandelier_01"   # the 30-candle chandelier in the hall
+        L.kit("Chandelier" + name, mesh, x, y, zc - chain, 0.0, scale=(sc, sc, sc), collision="none", folder=C)
     S = "Props/Sconces"
     n = 0
     for wall, (axis, face, facing, span) in WALLS.items():

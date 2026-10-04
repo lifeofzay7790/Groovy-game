@@ -1,13 +1,13 @@
 Leafy Manor blockout validation
   scale 0.680 | capsule r=28.0 hh=50.0 (height 100.0) | MaxStepHeight 45.0 | walkable 44.77 deg | cell 10 cm
-  primitives: 501 (279 collidable)
+  primitives: 509 (285 collidable)
   GrandStairs  riser 12.2 cm, tread 20.4 cm, slope 31.0 deg
   front arch width                141.4 cm (capsule needs 56.0)
   front arch height               355.0 cm (capsule needs 100.0)
   headroom under galleries        486.9 cm (capsule needs 100.0)
   gallery walkway (minus rail)    208.1 cm (capsule needs 56.0)
   grand stair width               210.8 cm (capsule needs 56.0)
-  walkable area reachable from PlayerStart: 583.2 m2 (58318 cells)
+  walkable area reachable from PlayerStart: 577.0 m2 (57700 cells)
   [OK ] Spawn                (-1564.0,     0.0,    0.0)
   [OK ] VestibuleDoor        (-1686.4,     0.0,    0.0)
   [OK ] HallEntry            (-1122.0,     0.0,    0.0)
@@ -33,7 +33,7 @@ Leafy Manor blockout validation
   [OK ] BehindStairNW        ( 1122.0, -1122.0,    0.0)
   [OK ] FrontArch            ( 1244.4,     0.0,    0.0)
   [OK ] Porch                ( 1564.0,     0.0,    0.0)
-  standable-but-unreachable cells (tops of props/rails, not reachable on foot): 10430
+  standable-but-unreachable cells (tops of props/rails, not reachable on foot): 10778
   map: LeafyManor/Docs/Validation/walkability_map.png
 
 RESULT: PASS (0 errors, 0 warnings)

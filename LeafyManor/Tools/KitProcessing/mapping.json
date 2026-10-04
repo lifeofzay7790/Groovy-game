@@ -1362,5 +1362,128 @@
   "pivot": "bottom_center",
   "tris": 20000,
   "collision": "box"
+ },
+ {
+  "name": "SM_LM_Chandelier_Grand_01",
+  "src": "Ornate_decor_P02",
+  "category": "Props",
+  "size": [
+   260,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "top_center",
+  "tris": 60000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Candelabra_Grand_01",
+  "src": "Ornate_decor_P04",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   200
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 30000,
+  "collision": [
+   [
+    -25,
+    25,
+    -25,
+    25,
+    0,
+    200
+   ]
+  ]
+ },
+ {
+  "name": "SM_LM_Painting_Castle_01",
+  "src": "Ornate_decor_P08",
+  "category": "Props",
+  "size": [
+   150,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "back_center",
+  "tris": 30000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Ivy_Garland_01",
+  "src": "Ornate_decor_P07",
+  "category": "Props",
+  "size": [
+   280,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "top_center_back",
+  "tris": 30000,
+  "collision": "none",
+  "rot_z": 6.25
+ },
+ {
+  "name": "SM_LM_Plant_HangingFern_01",
+  "src": "Ornate_decor_P03",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   150
+  ],
+  "fit": "height",
+  "pivot": "top_center",
+  "tris": 40000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_Candle_Cluster_01",
+  "src": "Ornate_decor_P01",
+  "category": "Props",
+  "size": [
+   60,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 20000,
+  "collision": "none"
+ },
+ {
+  "name": "SM_LM_CoffeeTable_Ornate_01",
+  "src": "Ornate_decor_P05",
+  "category": "Furniture",
+  "size": [
+   120,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 30000,
+  "collision": "box",
+  "rot_z": 3.75
+ },
+ {
+  "name": "SM_LM_Vase_Crown_01",
+  "src": "Ornate_decor_P06",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   120
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 25000,
+  "collision": "box"
  }
 ]
