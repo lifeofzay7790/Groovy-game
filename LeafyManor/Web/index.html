@@ -432,12 +432,13 @@ async function gunzip16(b64) {
   return new Int16Array(await new Response(stream).arrayBuffer());
 }
 
-let data, kitGltf, playerGltf, grid, spans, floorImgs;
+let data, kitGltf, kit2Gltf, playerGltf, grid, spans, floorImgs;
 try {
   data = await (await fetch('scene.json')).json();
-  totalBytes = data.bytes['kit.json'] + data.bytes['player.json'];
-  [kitGltf, playerGltf, grid, spans, floorImgs] = await Promise.all([
+  totalBytes = Object.values(data.bytes).reduce((a, b) => a + b, 0);
+  [kitGltf, kit2Gltf, playerGltf, grid, spans, floorImgs] = await Promise.all([
     loadGLTF('kit.json', 'kit'),
+    data.bytes['kit2.json'] ? loadGLTF('kit2.json', 'kit2') : null,   // models added after kit.json was packed
     loadGLTF('player.json', 'player'),
     gunzip16(data.grid.b64),
     gunzip16(data.grid.spans),
@@ -453,11 +454,12 @@ $('loadwhat').textContent = 'Building the hall';
 
 // ---------------------------------------------------------------- kit models
 const maxAniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-kitGltf.scene.updateMatrixWorld(true);
+const kitScenes = [kitGltf, kit2Gltf].filter(Boolean).map(g => g.scene);
+for (const sc of kitScenes) sc.updateMatrixWorld(true);
 const protos = {};                           // mesh name -> [{geometry, material, rel}]
 {
   const named = {};
-  kitGltf.scene.traverse(o => { if (o.name.startsWith('SM_LM_') && !named[o.name]) named[o.name] = o; });
+  for (const sc of kitScenes) sc.traverse(o => { if (o.name.startsWith('SM_LM_') && !named[o.name]) named[o.name] = o; });
   const seenMats = new Set();
   for (const [name, node] of Object.entries(named)) {
     const inv = node.matrixWorld.clone().invert(), parts = [];
@@ -576,7 +578,8 @@ for (const f of data.flames) addFlame(new THREE.Vector3(f[0], f[1], f[2]), f[3])
 // flames that belong to movable props: [mesh pattern, offset in the model's own frame (cm, front = +Y), size]
 const PROP_FLAMES = [
   [/WallSconce/, [0, 22, 48], 0.5], [/Candelabra_Floor/, [0, 0, 132], 0.7], [/Candelabra_Small/, [0, 0, 56], 0.35],
-  [/Fire_01/, [0, 0, 35], 1.6], [/Lantern/, [0, 0, 30], 0.5], [/Fountain_01/, [0, 0, 140], 4.2, true],
+  [/Fire_01/, [0, 0, 35], 1.6], [/Lantern/, [0, 0, 30], 0.5], [/LampPost/, [0, 0, 135], 0.6],
+  [/Fountain_01/, [0, 0, 140], 4.2, true],
 ];
 
 // ---------------------------------------------------------------- camera collision boxes (walls, floors, stairs)

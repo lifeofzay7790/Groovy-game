@@ -1257,5 +1257,110 @@
   "pivot": "back_center",
   "tris": 10000,
   "collision": "none"
+ },
+ {
+  "name": "SM_LM_Plant_Palm_01",
+  "src": "Ornate_furniture_P06",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   220
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 60000,
+  "collision": [
+   [
+    -37,
+    37,
+    -37,
+    37,
+    0,
+    70
+   ]
+  ]
+ },
+ {
+  "name": "SM_LM_Plant_FernUrn_01",
+  "src": "Ornate_furniture_P04",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   150
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 60000,
+  "collision": [
+   [
+    -33,
+    33,
+    -33,
+    33,
+    0,
+    150
+   ]
+  ]
+ },
+ {
+  "name": "SM_LM_Sofa_Velvet_01",
+  "src": "Ornate_furniture_P05",
+  "category": "Furniture",
+  "size": [
+   190,
+   null,
+   null
+  ],
+  "fit": "width",
+  "pivot": "bottom_center",
+  "tris": 40000,
+  "collision": "box",
+  "rot_z": 32.75
+ },
+ {
+  "name": "SM_LM_Armchair_Velvet_01",
+  "src": "Ornate_furniture_P03",
+  "category": "Furniture",
+  "size": [
+   null,
+   null,
+   100
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 30000,
+  "collision": "box",
+  "rot_z": 24.0
+ },
+ {
+  "name": "SM_LM_Pedestal_Grand_01",
+  "src": "Ornate_furniture_P02",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   100
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 20000,
+  "collision": "box",
+  "rot_z": -15.0
+ },
+ {
+  "name": "SM_LM_LampPost_01",
+  "src": "Ornate_furniture_P01",
+  "category": "Props",
+  "size": [
+   null,
+   null,
+   180
+  ],
+  "fit": "height",
+  "pivot": "bottom_center",
+  "tris": 20000,
+  "collision": "box"
  }
 ]

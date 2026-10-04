@@ -3,7 +3,7 @@
 The Leafy Manor entrance hall for Unreal Engine 5, built by a script from:
 - the reference sheets in `Docs/Reference/`
 - your floor-plan diorama
-- your model kit (88 game-ready models split from your Tripo sheets)
+- your model kit (94 game-ready models split from your Tripo sheets)
 
 It's scaled to your player character (97.8 cm, measured from your FBX). The same layout data drives the Unreal build script and an offline walkability validator, so what's validated is exactly what gets built.
 
@@ -35,7 +35,7 @@ These previews are browser (three.js) renders of the exact layout and models. Th
 1. **Edit → Plugins**: enable **Python Editor Script Plugin** and **Editor Scripting Utilities**.
 2. Clone or pull this repo; the script reads models from `LeafyManor/Models`. If you copy the Python files elsewhere, set `MODELS_DIR` at the top of `leafy_manor_build.py`.
 3. **Tools → Execute Python Script…** → `LeafyManor/Unreal/Python/leafy_manor_build.py`.
-   * The first run imports 88 models and 34 textures and builds the materials. This takes a few minutes, longer while Nanite builds.
+   * The first run imports the 94 models and their textures and builds the materials. This takes a few minutes, longer while Nanite builds.
    * The standard *Save changes?* dialog appears first; Cancel aborts without changing anything.
 4. Open `/Game/LeafyManor/Maps/LVL_LM_EntranceHall` and press **Play**. Your project's default GameMode spawns your character in the vestibule, facing the hall.
    * If a different pawn spawns, set **World Settings → GameMode Override** to your GameMode. This affects only this level.
@@ -79,10 +79,11 @@ The script writes only inside `/Game/LeafyManor/`. It never touches your charact
 ## Layout (follows your floor plan)
 
 * **Size:** 24.5 m square hall with two-storey walls (514 cm each) built from your wall kit, cornice, arched windows and a marble checker floor.
-* **Centre:** crowned fountain, ringed by planters with two crowned lions.
+* **Centre:** crowned fountain ringed by planters and fern urns, with two crowned lions on marble pedestals.
+* **Walkway:** tall palms and lit lantern posts frame the walk to the fountain, and more palms stand at the foot of each staircase.
 * **North–south axis:** blue/gold carpet runner, leaf rug and crown rug. The front arch opens to a porch with the night garden, castle backdrop and moon.
 * **Stairs:** two 45° grand staircases (41 steps, 12.2 cm risers, your balusters) rise from beside the fountain to landings on the U-shaped balcony (NW and NE corners).
-* **Lounges:** in the middle of the west and east walls, each with a fireplace, two sofas, table, chair and rug.
+* **Lounges:** in the middle of the west and east walls, each with a fireplace, two purple velvet sofas, a wingback armchair, a table and a rug.
 * **South-west corner:** globe, treasure chest and plants.
 * **South-east corner:** chess table and chairs.
 * **Entrance:** crowned dogs flank the vestibule opening, and the vestibule is where you spawn.
@@ -126,7 +127,7 @@ LeafyManor/
   Unreal/Python/leafy_manor_build.py    run inside Unreal Editor
   Unreal/Python/leafy_manor_layout.py   the hall layout (single source of truth)
   Unreal/Python/leafy_manor_kit.py      model sizes / pivots / collision (generated)
-  Models/{Architecture,Props,Furniture} 88 FBX models with UCX collision
+  Models/{Architecture,Props,Furniture} 94 FBX models with UCX collision
   Models/Textures/                      4K BaseColor / Normal (DirectX) / ORM per kit sheet + floor/stair textures
   Tools/validate_blockout.py            offline walkability validator (pure Python 3)
   Tools/KitProcessing/                  Blender scripts that split/scale/export your sheets + build the stairs
@@ -143,7 +144,7 @@ LeafyManor/
 | Step | State |
 |---|---|
 | 1–6 Analysis, blockout, scale, architecture, collision, walk test | Done; offline validator passes. Your in-editor play test is still needed |
-| 7 Replace blockout with real models | Done: 88 models from your sheets + a procedural staircase |
+| 7 Replace blockout with real models | Done: 94 models from your sheets + a procedural staircase |
 | 8 Materials | Done: kit materials from your textures, marble checker floor, stair marble and carpet |
 | 9–10 Furniture, props, plants, decoration | Done (first pass) |
 | 11 Lighting | Work lights only: chandeliers, fireplaces, fountain, sconces, moon. The full mood pass is next |

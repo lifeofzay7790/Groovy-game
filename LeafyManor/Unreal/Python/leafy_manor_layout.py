@@ -154,7 +154,7 @@ class _Layout:
             folder="Props", kind=None, **kw):
         """Place kit model `mesh` with its pivot at (x, y, z) du, its front facing `facing` (yaw deg)."""
         k = KIT[mesh]
-        W, D, H = (k["size"][i] * scale[i] for i in range(3))
+        W, D, H = (k.get("box", k["size"])[i] * scale[i] for i in range(3))   # collision footprint
         if collision is None:
             collision = "none" if k["collision"] == "none" else "block"
         kw.setdefault("mat", "Kit")
@@ -413,16 +413,21 @@ def _centre(L):
     fx, fy = FOUNTAIN
     L.kit("Fountain", "SM_LM_Fountain_01", fx, fy, 0, 180.0, shape="cyl", folder="Props/Fountain", step_up=False)
     for sy, t in ((-1, "W"), (1, "E")):
-        L.kit("Lion" + t, "SM_LM_LionStatue_01", fx, sy * 560, 0, 180.0, folder="Props/Statues")
+        # crowned lions on marble pedestals, as on the master sheet
+        L.kit("LionPedestal" + t, "SM_LM_Pedestal_Grand_01", fx, sy * 560, 0, 180.0, folder="Props/Statues")
+        L.kit("Lion" + t, "SM_LM_LionStatue_01", fx, sy * 560, KIT["SM_LM_Pedestal_Grand_01"]["size"][2] / LM_SCALE,
+              180.0, scale=(0.75, 0.75, 0.75), folder="Props/Statues")
     ring = [(15, "SM_LM_Plant_CrownPot_01"), (-15, "SM_LM_Plant_CrownPot_01"), (165, "SM_LM_Plant_Potted_01"),
-            (-165, "SM_LM_Plant_Potted_01"), (125, "SM_LM_Urn_Gold_01"), (-125, "SM_LM_Urn_Gold_01")]
+            (-165, "SM_LM_Plant_Potted_01"), (125, "SM_LM_Plant_FernUrn_01"), (-125, "SM_LM_Plant_FernUrn_01")]
     for i, (ang, mesh) in enumerate(ring):
         a = math.radians(ang)
         L.kit("FountainPlanter_%d" % (i + 1), mesh, fx + 540 * math.cos(a), fy + 540 * math.sin(a), 0, ang + 180.0,
               folder="Props/Plants")
-        if mesh.startswith("SM_LM_Urn"):
-            L.kit("FountainFern_%d" % (i + 1), "SM_LM_Plant_Fern_01", fx + 540 * math.cos(a), fy + 540 * math.sin(a), 95,
-                  ang, collision="none", folder="Props/Plants")
+    # tall palms framing the walkway and the foot of each staircase; lantern posts along the runner
+    for sy, t in ((-1, "W"), (1, "E")):
+        L.kit("PalmSouth" + t, "SM_LM_Plant_Palm_01", -1100, sy * 820, 0, 0.0, folder="Props/Plants")
+        L.kit("PalmStair" + t, "SM_LM_Plant_Palm_01", 250, sy * 850, 0, 180.0, folder="Props/Plants")
+        L.kit("LampPost" + t, "SM_LM_LampPost_01", -700, sy * 640, 0, -sy * 90.0, folder="Props/Lighting")
     # rugs + carpet runner along the N-S axis
     R = "Props/Rugs"
     L.kit("Rug_South", "SM_LM_Rug_Leaf_01", -1100, 0, 0.2, 0.0, collision="none", folder=R)
@@ -445,10 +450,9 @@ def _lounge(L, sy):
     L.kit("LoungeTable" + t, "SM_LM_OrnateTable_01", LOUNGE_X, cy, 0, face, folder=F)
     L.kit("LoungeCandles" + t, "SM_LM_Candelabra_Small_01", LOUNGE_X, cy, 84, face, collision="none", folder=F)
     for side, u in ((-1, "S"), (1, "N")):
-        L.kit("LoungeSofa%s%s" % (t, u), "SM_LM_Sofa_01", LOUNGE_X + side * 235, cy, 0, 180.0 if side > 0 else 0.0, folder=F)
-        L.kit("LoungeCushion%s%s" % (t, u), "SM_LM_Cushion_Leaf_01", LOUNGE_X + side * 240, cy, 50,
-              180.0 if side > 0 else 0.0, collision="none", folder=F)
-    L.kit("LoungeChair" + t, "SM_LM_Chair_01", LOUNGE_X, cy - sy * 250, 0, face + 180.0, folder=F)
+        L.kit("LoungeSofa%s%s" % (t, u), "SM_LM_Sofa_Velvet_01", LOUNGE_X + side * 250, cy, 0, 180.0 if side > 0 else 0.0,
+              folder=F)
+    L.kit("LoungeChair" + t, "SM_LM_Armchair_Velvet_01", LOUNGE_X, cy - sy * 270, 0, face + 180.0, folder=F)
     L.kit("LoungeOttoman" + t, "SM_LM_Ottoman_Purple_01", LOUNGE_X + 330, wall - sy * 120, 0, face, folder=F)
     L.kit("UpperBanner" + t, "SM_LM_Banner_Red_01", 0, wall, 1420, face, collision="none", folder="Props/Banners")
     # plants beside the hearth and along the wall towards the stairs

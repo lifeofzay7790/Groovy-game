@@ -3,7 +3,9 @@ import base64, json, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 D = os.path.join(HERE, 'build')
 WEB = os.path.join(HERE, '..', '..', 'Web')
-for n in ('kit', 'player'):
+for n in ('kit', 'kit2', 'player'):
+    if not os.path.exists(os.path.join(D, n + '.gltf')):
+        continue
     j = json.load(open(os.path.join(D, n + '.gltf')))
     bin_ = open(os.path.join(D, n + '.bin'), 'rb').read()
     views = j['bufferViews']

@@ -72,6 +72,7 @@ FX_MATERIALS = {
     "SM_LM_Candelabra_Floor_01": dict(GlowStrength=12.0, GlowThreshold=0.25, FlickerAmount=0.08),
     "SM_LM_Candelabra_Small_01": dict(GlowStrength=12.0, GlowThreshold=0.25, FlickerAmount=0.08),
     "SM_LM_Lantern_01": dict(GlowStrength=10.0, GlowThreshold=0.25, FlickerAmount=0.08),
+    "SM_LM_LampPost_01": dict(GlowStrength=10.0, GlowThreshold=0.3, FlickerAmount=0.08),
     "SM_LM_WallSconce_Torch_01": dict(GlowStrength=12.0, GlowThreshold=0.25, FlickerAmount=0.1),
     "SM_LM_WallSconce_Bowl_01": dict(GlowStrength=12.0, GlowThreshold=0.25, FlickerAmount=0.1),
     "SM_LM_Chandelier_01": dict(GlowStrength=8.0, GlowThreshold=0.3),
@@ -666,7 +667,7 @@ MOOD_LIGHTS = {
 }
 # warm light at the flames of floor / table candelabras and lanterns: mesh -> flame height (cm), candelas
 CANDLE_LIGHTS = {"SM_LM_Candelabra_Floor_01": (125.0, 260.0), "SM_LM_Candelabra_Small_01": (52.0, 120.0),
-                 "SM_LM_Lantern_01": (28.0, 90.0)}
+                 "SM_LM_Lantern_01": (28.0, 90.0), "SM_LM_LampPost_01": (135.0, 300.0)}
 
 
 def _try_set(obj, prop, value):

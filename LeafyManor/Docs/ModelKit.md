@@ -1,6 +1,6 @@
 # Leafy Manor Model Kit (from your Tripo sheets)
 
-Your 9 FBX "kit sheets" were split into separate pieces, scaled to game size for the 97.8 cm character, given pivots and
+Your 9 FBX "kit sheets" and the ornate-furniture GLB were split into separate pieces, scaled to game size for the 97.8 cm character, given pivots and
 simple collision, and exported one FBX per model into `LeafyManor/Models/`. Everything is reproducible with
 `Tools/KitProcessing/` (Blender 4.5 as a Python module).
 
@@ -22,7 +22,7 @@ simple collision, and exported one FBX per model into `LeafyManor/Models/`. Ever
 ## Still missing
 Nothing from the original list. (The ornamental-statues upload added knights, lions, dogs, busts, clocks, fireplaces and the chandelier.)
 
-## Models (88)
+## Models (94)
 
 | Model | Folder | Used for | Size W × D × H (cm) | Triangles | Collision | Source (your file, piece) |
 |---|---|---|---|---|---|---|
@@ -114,5 +114,19 @@ Nothing from the original list. (The ornamental-statues upload added knights, li
 | `SM_LM_Stair_Grand_01` | Architecture | Both diagonal grand staircases (41 treads, 12.2 cm risers) | 836 × 238 × 514 | <1k | none (ramp + blockers in level) | built by `build_stairs.py` |
 | `SM_LM_StairBalustrade_01` | Architecture | Stair railings (your balusters + marble handrail) | 846 × 19 × 575 | 62k | none | built from `SM_LM_Baluster_01` |
 | `SM_LM_Runner_01` | Architecture | Blue/gold carpet runner tile (165 cm) | 165 × 143 × 0 | <1k | none | your carpet texture |
+| `SM_LM_Plant_Palm_01` | Props | Tall palms framing the walkway and the stairs | 180.6 × 129.7 × 220 | 60k | pot only (74 × 74 × 70) | ornate furniture GLB P06 |
+| `SM_LM_Plant_FernUrn_01` | Props | Fern urns in the fountain ring | 131.3 × 123.4 × 150 | 60k | urn only (66 × 66 × 150) | ornate furniture GLB P04 |
+| `SM_LM_Sofa_Velvet_01` | Furniture | Lounge sofas (purple tufted velvet) | 190 × 86.3 × 81.8 | 40k | box | ornate furniture GLB P05 |
+| `SM_LM_Armchair_Velvet_01` | Furniture | Lounge wingback armchairs | 86.8 × 73.9 × 100 | 30k | box | ornate furniture GLB P03 |
+| `SM_LM_Pedestal_Grand_01` | Props | Marble pedestals under the fountain lions | 79 × 80.3 × 100 | 20k | box | ornate furniture GLB P02 |
+| `SM_LM_LampPost_01` | Props | Lantern posts along the walkway (lit) | 57 × 56.7 × 180 | 20k | box | ornate furniture GLB P01 |
 
 Per-sheet piece numbers are shown in `Docs/Models/Sheet_<name>.png`.
+
+## Adding a new Tripo GLB sheet
+
+1. Write its textures with `python Tools/KitProcessing/kit_textures.py <sheet.glb> <Sheet>`.
+2. Split it with `python Tools/KitProcessing/split_sheet.py <sheet.glb> Models/Textures/T_LM_Kit_<Sheet>_BaseColor.jpg Tools/KitProcessing/split <Sheet>`.
+3. Add the pieces to `mapping.json`. Then run `process_pieces.py mapping.json <out_dir> <names…>` and copy the FBX files into `Models/`.
+4. Add the models to `Unreal/Python/leafy_manor_kit.py`.
+5. Put the new models in the browser version with `Tools/WebWalkthrough/add_web_models.sh` (`KIT_OUT_DIR=<out_dir>`).

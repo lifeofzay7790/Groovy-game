@@ -2,9 +2,11 @@
 
 Generated from the kit processing report - do not edit by hand.
 size = [W (local X), D (local Y, front = +Y in Unreal), H] cm.
+box (optional) = [W, D, H] cm of the collision when it is smaller than the model (plants: just the pot).
 """
 
 KIT = {
+    'SM_LM_Armchair_Velvet_01': dict(size=(86.8, 73.9, 100.0), pivot='bottom_center', collision='box', category='Furniture', material='M_LM_Kit_Ornate_furniture'),
     'SM_LM_Backdrop_CastleCliff_01': dict(size=(2999.9, 2433.6, 1635.0), pivot='bottom_center', collision='none', category='Props', material='M_LM_Kit_Lighting_and_mood'),
     'SM_LM_Baluster_01': dict(size=(18.2, 18.8, 55.0), pivot='bottom_center', collision='box', category='Architecture', material='M_LM_Kit_Stairs'),
     'SM_LM_Balustrade_01': dict(size=(136.0, 29.9, 61.0), pivot='bottom_center', collision='box', category='Architecture', material='M_LM_Kit_Stairs'),
@@ -49,6 +51,7 @@ KIT = {
     'SM_LM_Ivy_Hanging_01': dict(size=(75.9, 42.7, 120.1), pivot='top_center_back', collision='none', category='Props', material='M_LM_Kit_Props_and_foliage'),
     'SM_LM_Ivy_Hanging_02': dict(size=(91.3, 40.6, 120.0), pivot='top_center_back', collision='none', category='Props', material='M_LM_Kit_Props_and_foliage'),
     'SM_LM_KnightArmor_01': dict(size=(51.0, 43.7, 160.0), pivot='bottom_center', collision='box', category='Props', material='M_LM_Kit_Statues'),
+    'SM_LM_LampPost_01': dict(size=(57.0, 56.7, 180.0), pivot='bottom_center', collision='box', category='Props', material='M_LM_Kit_Ornate_furniture'),
     'SM_LM_Lantern_01': dict(size=(29.3, 30.5, 55.0), pivot='bottom_center', collision='none', category='Props', material='M_LM_Kit_Lighting_and_mood'),
     'SM_LM_LilyPads_01': dict(size=(100.1, 108.3, 64.5), pivot='bottom_center', collision='none', category='Props', material='M_LM_Kit_Environment_details'),
     'SM_LM_LionStatue_01': dict(size=(85.6, 87.5, 170.0), pivot='bottom_center', collision='box', category='Props', material='M_LM_Kit_Statues'),
@@ -60,8 +63,11 @@ KIT = {
     'SM_LM_Ottoman_Blue_01': dict(size=(39.7, 24.6, 40.0), pivot='bottom_center', collision='box', category='Furniture', material='M_LM_Kit_Props_and_foliage'),
     'SM_LM_Ottoman_Purple_01': dict(size=(39.8, 24.6, 40.0), pivot='bottom_center', collision='box', category='Furniture', material='M_LM_Kit_Props_and_foliage'),
     'SM_LM_Pedestal_01': dict(size=(51.0, 54.0, 100.0), pivot='bottom_center', collision='box', category='Props', material='M_LM_Kit_Architecture'),
+    'SM_LM_Pedestal_Grand_01': dict(size=(79.0, 80.3, 100.0), pivot='bottom_center', collision='box', category='Props', material='M_LM_Kit_Ornate_furniture'),
     'SM_LM_Plant_CrownPot_01': dict(size=(112.3, 103.2, 120.0), pivot='bottom_center', collision='box', category='Props', material='M_LM_Kit_Environment_details'),
+    'SM_LM_Plant_FernUrn_01': dict(size=(131.3, 123.4, 150.0), pivot='bottom_center', collision='box', box=(66.0, 66.0, 150.0), category='Props', material='M_LM_Kit_Ornate_furniture'),
     'SM_LM_Plant_Fern_01': dict(size=(128.6, 126.4, 80.1), pivot='bottom_center', collision='none', category='Props', material='M_LM_Kit_Environment_details'),
+    'SM_LM_Plant_Palm_01': dict(size=(180.6, 129.7, 220.0), pivot='bottom_center', collision='box', box=(74.0, 74.0, 70.0), category='Props', material='M_LM_Kit_Ornate_furniture'),
     'SM_LM_Plant_Potted_01': dict(size=(92.1, 103.9, 110.0), pivot='bottom_center', collision='box', category='Props', material='M_LM_Kit_Props_and_foliage'),
     'SM_LM_Planter_Flowers_01': dict(size=(120.0, 106.2, 97.7), pivot='bottom_center', collision='box', category='Props', material='M_LM_Kit_Environment_details'),
     'SM_LM_Plaque_01': dict(size=(150.0, 16.0, 62.0), pivot='bottom_center_back', collision='none', category='Props', material='M_LM_Kit_Architecture'),
@@ -72,6 +78,7 @@ KIT = {
     'SM_LM_Runner_01': dict(size=(165.0, 143.0, 0.0), pivot='center', collision='none', category='Architecture', material='stair'),
     'SM_LM_SconcePlate_01': dict(size=(23.9, 15.0, 45.0), pivot='back_center', collision='none', category='Props', material='M_LM_Kit_Lighting_and_mood'),
     'SM_LM_Sofa_01': dict(size=(170.1, 42.8, 62.6), pivot='bottom_center', collision='box', category='Furniture', material='M_LM_Kit_key_prop_sheet'),
+    'SM_LM_Sofa_Velvet_01': dict(size=(190.0, 86.3, 81.8), pivot='bottom_center', collision='box', category='Furniture', material='M_LM_Kit_Ornate_furniture'),
     'SM_LM_StairBalustrade_01': dict(size=(846.4, 18.8, 70.0), pivot='stair', collision='none', category='Architecture', material='stair'),
     'SM_LM_StairStringer_01': dict(size=(860.1, 30.0, 530.0), pivot='bottom_center', collision='none', category='Architecture', material='M_LM_Kit_Stairs'),
     'SM_LM_Stair_Grand_01': dict(size=(836.4, 238.0, 514.1), pivot='stair', collision='none', category='Architecture', material='stair'),
