@@ -1,7 +1,8 @@
 """Split a Tripo 'kit sheet' FBX into separate pieces.
 
-usage: python split_sheet.py <sheet.fbx> <tex_prefix> <out_dir>
+usage: python split_sheet.py <sheet.fbx|sheet.glb> <tex_prefix|basecolor image> <out_dir> [sheet_name]
 Writes <out_dir>/<name>.blend (full-res pieces), preview GLBs and pieces.json.
+For a GLB, pass the base-colour image written by kit_textures.py instead of a tex prefix.
 """
 import json
 import os
@@ -15,12 +16,15 @@ from scipy.sparse.csgraph import connected_components
 
 fbx, tex_prefix, out = sys.argv[1:4]
 out = os.path.abspath(out)
-name = os.path.splitext(os.path.basename(fbx))[0].replace("+", "_")
+name = sys.argv[4] if len(sys.argv) > 4 else os.path.splitext(os.path.basename(fbx))[0].replace("+", "_")
 TEX = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tex")
 os.makedirs(os.path.join(out, "glb"), exist_ok=True)
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
-bpy.ops.import_scene.fbx(filepath=fbx)
+if fbx.lower().endswith((".glb", ".gltf")):
+    bpy.ops.import_scene.gltf(filepath=fbx, merge_vertices=True)
+else:
+    bpy.ops.import_scene.fbx(filepath=fbx)
 src = [o for o in bpy.context.scene.objects if o.type == "MESH"][0]
 bpy.context.view_layer.objects.active = src
 src.select_set(True)
@@ -68,7 +72,8 @@ pieces = np.unique(plab)
 # material with 1K preview texture
 prev_png = os.path.join(out, "glb", name + "_basecolor_1k.png")
 if not os.path.exists(prev_png):
-    Image.open(os.path.join(TEX, tex_prefix + "_basecolor.JPEG")).resize((1024, 1024), Image.LANCZOS).save(prev_png)
+    src_tex = tex_prefix if os.path.isfile(tex_prefix) else os.path.join(TEX, tex_prefix + "_basecolor.JPEG")
+    Image.open(src_tex).resize((1024, 1024), Image.LANCZOS).save(prev_png)
 mat = bpy.data.materials.new(name + "_preview"); mat.use_nodes = True
 bsdf = mat.node_tree.nodes["Principled BSDF"]
 img = mat.node_tree.nodes.new("ShaderNodeTexImage"); img.image = bpy.data.images.load(prev_png); img.image.pack()

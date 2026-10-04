@@ -110,8 +110,9 @@ for p in prims:
     if p.collision != 'none':
         solids.append(solid(p))
 
-# models that can be added in the editor: editable kinds that are packed in kit.json
-packed = {n.get('name') for n in json.load(open(os.path.join(WEB, 'kit.json')))['nodes']}
+# models that can be added in the editor: editable kinds that are packed in kit.json / kit2.json
+KIT_FILES = [f for f in ('kit.json', 'kit2.json') if os.path.exists(os.path.join(WEB, f))]
+packed = {n.get('name') for f in KIT_FILES for n in json.load(open(os.path.join(WEB, f)))['nodes']}
 catalog = {}
 for m, k in sorted(KIT.items()):
     if m in packed and k['category'] in ('Props', 'Furniture') and 'Backdrop' not in m and 'Moon' not in m:
@@ -166,7 +167,7 @@ out = dict(kit=kit, boxes=boxes, cam=cam, lights=lights, flames=flames, items=it
                      lounge_x=lm.LOUNGE_X * S, gal_in=lm.GAL_IN * S, north_gal_x0=lm.NORTH_GAL_X0 * S,
                      side_gal_x0=lm.SIDE_GAL_X0 * S, fountain=[v * S for v in lm.FOUNTAIN]),
            grid=grid)
-out['bytes'] = {k: os.path.getsize(os.path.join(WEB, k)) for k in ('kit.json', 'player.json')}
+out['bytes'] = {k: os.path.getsize(os.path.join(WEB, k)) for k in KIT_FILES + ['player.json']}
 json.dump(out, open(os.path.join(WEB, 'scene.json'), 'w'), separators=(',', ':'))
 print('items', len(items), 'parented', sum(1 for i in items if i['par']), 'solids', len(solids), 'catalog', len(catalog),
       'kit meshes', len(kit), 'instances', sum(len(v) for v in kit.values()), 'boxes', len(boxes), 'cam', len(cam),

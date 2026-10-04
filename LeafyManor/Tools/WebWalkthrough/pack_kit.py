@@ -1,7 +1,9 @@
 """Pack the kit models used by the layout into one web GLB (decimated, shared textures).
 
-Usage (Blender Python / bpy module): python pack_kit.py <kit_out_dir>
+Usage (Blender Python / bpy module): python pack_kit.py [--new] <kit_out_dir>
 <kit_out_dir> is the folder given to KitProcessing/process_pieces.py; its _preview/*.glb are read.
+--new packs only the models the layout uses that Web/kit.json doesn't have yet, into build/kit2_raw.glb
+(the page loads kit2.json next to kit.json), so kit.json needn't be rebuilt from every preview.
 """
 import os, sys, json
 import bpy
@@ -14,13 +16,23 @@ sys.path.insert(0, REPO + '/Unreal/Python')
 import leafy_manor_layout as lm
 
 used = sorted({p.mesh for p in lm.build() if p.mesh})
+NEW_ONLY = '--new' in sys.argv
+OUT_NAME = 'kit2_raw.glb' if NEW_ONLY else 'kit_raw.glb'
+if NEW_ONLY:
+    have = {n.get('name') for n in json.load(open(os.path.join(REPO, 'Web', 'kit.json')))['nodes']}
+    used = [m for m in used if m not in have]
 TEX_SRC = REPO + '/Models/Textures'
-TEX_SIZE = {'door_set': 2048, 'Architecture': 2048}
+TEX_SIZE = {'door_set': 2048, 'Architecture': 2048, 'Ornate_furniture': 2048, 'Ornate_decor': 2048, 'Crafted': 2048}
 TARGET = {'SM_LM_Fountain_01': 16000, 'SM_LM_StairBalustrade_01': 14000, 'SM_LM_Stair_Grand_01': 999999,
           'SM_LM_Runner_01': 999999, 'SM_LM_LionStatue_01': 9000, 'SM_LM_Backdrop_CastleCliff_01': 7000}
 for w in ('Plain', 'Window', 'Arch', 'DoorSingle', 'DoorDouble'):
     TARGET['SM_LM_Wall_%s_01' % w] = 4500
 TARGET.update({'SM_LM_Cornice_01': 1800, 'SM_LM_Balustrade_01': 2500})
+TARGET.update({'SM_LM_Plant_Palm_01': 12000, 'SM_LM_Plant_FernUrn_01': 12000, 'SM_LM_Sofa_Velvet_01': 8000,
+               'SM_LM_Armchair_Velvet_01': 7000})
+TARGET.update({'SM_LM_Chandelier_Grand_01': 14000, 'SM_LM_Ivy_Garland_01': 9000, 'SM_LM_Plant_HangingFern_01': 9000,
+               'SM_LM_Candelabra_Grand_01': 6000, 'SM_LM_Painting_Castle_01': 3000})
+TARGET.update({m: 999999 for m in ('SM_LM_Banner_GoodPlants_01', 'SM_LM_Banner_HigherTogether_01', 'SM_LM_FountainWater_01')})
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 shared_img, shared_mat = {}, {}
@@ -107,7 +119,7 @@ for im in list(bpy.data.images):
         bpy.data.images.remove(im)
 
 bpy.ops.object.select_all(action='SELECT')
-bpy.ops.export_scene.gltf(filepath=os.path.join(HERE, 'build', 'kit_raw.glb'), export_format='GLB',
+bpy.ops.export_scene.gltf(filepath=os.path.join(HERE, 'build', OUT_NAME), export_format='GLB',
                           use_selection=True, export_image_format='JPEG', export_jpeg_quality=80,
                           export_apply=True, export_animations=False, export_extras=False)
 tot = 0

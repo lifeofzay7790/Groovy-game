@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
 LeafyManor/Tools/WebWalkthrough/build/
+LeafyManor/Tools/KitProcessing/split/
+LeafyManor/Unreal/local_paths.cfg
