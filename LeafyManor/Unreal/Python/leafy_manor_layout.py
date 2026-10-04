@@ -413,7 +413,9 @@ def _centre(L):
     fx, fy = FOUNTAIN
     L.kit("Fountain", "SM_LM_Fountain_01", fx, fy, 0, 180.0, shape="cyl", folder="Props/Fountain", step_up=False)
     for sy, t in ((-1, "W"), (1, "E")):
-        L.kit("Lion" + t, "SM_LM_LionStatue_01", fx, sy * 560, 0, 180.0, folder="Props/Statues")
+        L.kit("Lion" + t, "SM_LM_LionStatue_01", fx - 350, sy * 600, 0, 180.0, folder="Props/Statues")
+        L.kit("FountainCandelabra" + t, "SM_LM_Candelabra_Floor_01", fx - 440, sy * 760, 0, 180.0,
+              folder="Props/Lighting")
     ring = [(15, "SM_LM_Plant_CrownPot_01"), (-15, "SM_LM_Plant_CrownPot_01"), (165, "SM_LM_Plant_Potted_01"),
             (-165, "SM_LM_Plant_Potted_01"), (125, "SM_LM_Urn_Gold_01"), (-125, "SM_LM_Urn_Gold_01")]
     for i, (ang, mesh) in enumerate(ring):
@@ -440,7 +442,7 @@ def _lounge(L, sy):
     L.kit("Fireplace" + t, "SM_LM_Fireplace_01", LOUNGE_X, wall, 0, face, folder="Props/Fireplaces", step_up=False)
     L.kit("FireplaceFire" + t, "SM_LM_Fire_01", LOUNGE_X, wall - sy * 60, 12, face, scale=(1.2, 0.8, 0.9),
           collision="none", folder="Props/Fireplaces")
-    cy = wall - sy * 400
+    cy = wall - sy * 530
     L.kit("LoungeRug" + t, "SM_LM_Rug_Lounge_01", LOUNGE_X, cy, 0.3, 0.0, collision="none", folder=F)
     L.kit("LoungeTable" + t, "SM_LM_OrnateTable_01", LOUNGE_X, cy, 0, face, folder=F)
     L.kit("LoungeCandles" + t, "SM_LM_Candelabra_Small_01", LOUNGE_X, cy, 84, face, collision="none", folder=F)
@@ -450,7 +452,7 @@ def _lounge(L, sy):
               180.0 if side > 0 else 0.0, collision="none", folder=F)
     L.kit("LoungeChair" + t, "SM_LM_Chair_01", LOUNGE_X, cy - sy * 250, 0, face + 180.0, folder=F)
     L.kit("LoungeOttoman" + t, "SM_LM_Ottoman_Purple_01", LOUNGE_X + 330, wall - sy * 120, 0, face, folder=F)
-    L.kit("UpperBanner" + t, "SM_LM_Banner_Red_01", 0, wall, 1420, face, collision="none", folder="Props/Banners")
+    L.kit("UpperBanner" + t, "SM_LM_Banner_Crown_01", 0, wall, 1420, face, collision="none", folder="Props/Banners")
 
 
 def _corners(L):
@@ -502,6 +504,36 @@ def _under_galleries(L):
     L.kit("UpperBannerN", "SM_LM_Banner_Crown_01", HALF, 0, 1500, 180.0, collision="none", folder="Props/Banners")
     L.kit("VestibuleChest", "SM_LM_Crate_Crown_01", -2480, -480, 0, 45.0, folder="Furniture/Vestibule")
     L.kit("VestibulePlant", "SM_LM_Plant_Potted_01", -2480, 480, 0, -45.0, folder="Props/Plants")
+
+
+def _reference_dressing(L):
+    """Layer the existing kit around architecture, leaving circulation clear."""
+    for sy, side in ((-1, "W"), (1, "E")):
+        face = 90.0 if sy < 0 else -90.0
+        for i, x in enumerate((-1400, -650, 100, 850, 1550)):
+            L.kit("UpperIvy%s%d" % (side, i), "SM_LM_Ivy_Hanging_01",
+                  x, sy * (HALF - 40), 1390, face, scale=(2.0, 1.25, 1.8),
+                  collision="none", folder="Props/Plants")
+        for i, x in enumerate((650, 1100, 1550)):
+            L.kit("GalleryIvy%s%d" % (side, i), "SM_LM_Ivy_Hanging_02",
+                  x, sy * GAL_IN, Z_GALLERY + 85, face, scale=(1.2, 1.0, 1.35),
+                  collision="none", folder="Props/Plants")
+            L.kit("GalleryPlanter%s%d" % (side, i), "SM_LM_Plant_CrownPot_01",
+                  x, sy * (GAL_IN + 20), Z_GALLERY + 88, face, scale=(0.65, 0.65, 0.8),
+                  collision="none", folder="Props/Plants")
+        for i, x in enumerate((LOUNGE_X - 430, LOUNGE_X + 430)):
+            L.kit("HearthPlant%s%d" % (side, i), "SM_LM_Plant_Potted_01",
+                  x, sy * (HALF - 100), 0, face, scale=(1.2, 1.2, 1.3), folder="Props/Plants")
+        for i, y in enumerate((400, 850, 1300)):
+            L.kit("NorthUpperIvy%s%d" % (side, i), "SM_LM_Ivy_Hanging_02",
+                  HALF - 30, sy * y, 1480, 180, scale=(1.2, 1.0, 1.65),
+                  collision="none", folder="Props/Plants")
+    # Recessed navy ceiling with a fine gilded coffer grid.
+    for i, c in enumerate(range(-1600, 1601, 800)):
+        L.box("CeilingRibX%d" % i, -HALF, HALF, c - 9, c + 9, Z_CEIL - 12, Z_CEIL,
+              mat="Gold", collision="none", folder="Architecture/Ceiling")
+        L.box("CeilingRibY%d" % i, c - 9, c + 9, -HALF, HALF, Z_CEIL - 12, Z_CEIL,
+              mat="Gold", collision="none", folder="Architecture/Ceiling")
 
 
 def _lights_dressing(L):
@@ -620,6 +652,7 @@ def build_design():
     _corners(L)
     _under_galleries(L)
     _lights_dressing(L)
+    _reference_dressing(L)
     _apply_edits(L)
     return L.prims
 

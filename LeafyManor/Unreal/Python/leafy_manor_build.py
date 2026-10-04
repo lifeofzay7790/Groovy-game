@@ -24,6 +24,7 @@ import glob
 import importlib
 import os
 import sys
+from types import SimpleNamespace
 
 import unreal
 
@@ -36,9 +37,11 @@ except NameError:  # executed without __file__: rely on Content/Python being on 
 
 import leafy_manor_kit as lmk  # noqa: E402
 import leafy_manor_layout as lm  # noqa: E402
+import leafy_manor_polish as polish  # noqa: E402
 
 importlib.reload(lmk)
 importlib.reload(lm)
+importlib.reload(polish)
 
 # ---------------------------------------------------------------------------
 # Settings
@@ -48,6 +51,7 @@ MODELS_DIR = os.path.normpath(os.path.join(_HERE, "..", "..", "Models"))
 REIMPORT_MODELS = False           # True = re-import FBX/textures even if the assets already exist
 REBUILD_MATERIALS = False         # True = regenerate the generated materials
 ENABLE_NANITE = True
+REFERENCE_POLISH = True           # Unreal-only atmosphere, effects and material finish
 SCONCE_LIGHTS = True              # small warm light at every wall sconce
 
 ROOT = "/Game/LeafyManor"
@@ -287,7 +291,10 @@ def _tex(name, fallback):
 
 def ensure_kit_master(folder):
     """M_LM_KitMaster: BaseColor / Normal / ORM (R=AO, G=Roughness, B=Metallic) + constant fallbacks."""
-    mat, created = _new_asset("M_LM_KitMaster", folder, unreal.Material, unreal.MaterialFactoryNew())
+    mat, created = _new_asset("M_LM_KitMaster_ReferenceV2", folder, unreal.Material, unreal.MaterialFactoryNew())
+    if ENABLE_NANITE:
+        MEL.set_material_usage(mat, unreal.MaterialUsage.MATUSAGE_NANITE)
+        EAL.save_loaded_asset(mat)
     if not created:
         return mat
     T, S, V = unreal.MaterialExpressionTextureSampleParameter2D, unreal.MaterialExpressionScalarParameter, \
@@ -307,7 +314,28 @@ def ensure_kit_master(folder):
     col = _expr(mat, unreal.MaterialExpressionMultiply, -300, -300)
     _connect(bc, col, "A", "RGB")
     _connect(tint, col, "B")
-    MEL.connect_material_property(col, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    # A selective blue/purple mask preserves gold embroidery and pale stone.
+    diff = _expr(mat, unreal.MaterialExpressionSubtract, -500, -650)
+    _connect(bc, diff, "A", "B")
+    _connect(bc, diff, "B", "G")
+    gain = _expr(mat, unreal.MaterialExpressionMultiply, -350, -650, const_b=7.0)
+    _connect(diff, gain, "A")
+    mask = _expr(mat, unreal.MaterialExpressionSaturate, -200, -650)
+    _connect(gain, mask)
+    strength = _expr(mat, S, -200, -800, parameter_name="ClothStrength", default_value=0.0)
+    alpha = _expr(mat, unreal.MaterialExpressionMultiply, -50, -650)
+    _connect(mask, alpha, "A")
+    _connect(strength, alpha, "B")
+    cloth = _expr(mat, V, -200, -1000, parameter_name="ClothTint",
+                  default_value=unreal.LinearColor(0.24, 0.38, 0.70, 1))
+    navy = _expr(mat, unreal.MaterialExpressionMultiply, 0, -350)
+    _connect(col, navy, "A")
+    _connect(cloth, navy, "B")
+    finish = _expr(mat, unreal.MaterialExpressionLinearInterpolate, 180, -300)
+    _connect(col, finish, "A")
+    _connect(navy, finish, "B")
+    _connect(alpha, finish, "Alpha")
+    MEL.connect_material_property(finish, "", unreal.MaterialProperty.MP_BASE_COLOR)
     MEL.connect_material_property(nm, "RGB", unreal.MaterialProperty.MP_NORMAL)
     lr = _expr(mat, unreal.MaterialExpressionLinearInterpolate, -300, 300)
     _connect(rc, lr, "A")
@@ -383,7 +411,7 @@ def ensure_kit_materials():
     specs["M_LM_StairMarble"] = ("T_LM_Marble_Cream_BaseColor", None, None, 0.0, 0.25, 0.0)
     specs["M_LM_StairCarpet"] = ("T_LM_StairCarpet_BaseColor", None, None, 0.0, 0.95, 0.0)
     for slot, (b, n, o, use, rough, metal) in specs.items():
-        mi, created = _new_asset("MI" + slot[1:], folder, unreal.MaterialInstanceConstant,
+        mi, created = _new_asset("MI" + slot[1:] + "_ReferenceV2", folder, unreal.MaterialInstanceConstant,
                                  unreal.MaterialInstanceConstantFactoryNew())
         if created:
             MEL.set_material_instance_parent(mi, master)
@@ -459,6 +487,7 @@ def _collision(actor, smc, p):
         smc.set_collision_profile_name("InvisibleWall")
         smc.set_collision_response_to_channel(unreal.CollisionChannel.ECC_CAMERA, unreal.CollisionResponseType.ECR_IGNORE)
         actor.set_actor_hidden_in_game(True)
+        smc.set_editor_property("visible", False)
         smc.set_editor_property("affect_distance_field_lighting", False)
         smc.set_editor_property("affect_dynamic_indirect_lighting", False)
     else:
@@ -546,8 +575,8 @@ def spawn_gameplay(eas, s):
     _finish(ppv, "PPV_LM_EntranceHall", "Lighting", "PostProcess")
 
 
-def main():
-    if not unreal.EditorLoadingAndSavingUtils.save_dirty_packages_with_dialog(True, True):
+def main(prompt_save=True):
+    if prompt_save and not unreal.EditorLoadingAndSavingUtils.save_dirty_packages_with_dialog(True, True):
         unreal.log_warning("[LeafyManor] cancelled - nothing was changed")
         return
     ensure_folders()
@@ -577,6 +606,8 @@ def main():
         spawn_lights(eas, s, prims, dressed)
         task.enter_progress_frame(1, "PlayerStart, test points, nav bounds")
         spawn_gameplay(eas, s)
+        if dressed and REFERENCE_POLISH:
+            polish.apply(SimpleNamespace(**globals()), eas, prims, meshes)
         task.enter_progress_frame(1, "Saving")
         les.save_current_level()
         EAL.save_directory(ROOT, only_if_is_dirty=True, recursive=True)

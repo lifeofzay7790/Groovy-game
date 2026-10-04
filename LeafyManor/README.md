@@ -30,6 +30,16 @@ These previews are browser (three.js) renders of the exact layout and models. Th
   * Delete the file to go back to the original layout.
 * **Rebuilding:** after a layout or model change, rebuild it with `Tools/WebWalkthrough/build_web.sh`. The settings are listed at the top of that script.
 
+## Standalone Unreal project
+
+![Unreal entrance view](Docs/Preview/unreal_reference_pass.png)
+
+This image is an actual Unreal viewport capture. The earlier preview grid above is from the browser.
+
+Open `UnrealProject/LeafyManor/LeafyManor.uproject` in Unreal 5.6. This project is independent and uses only this repository's manor kit. The entrance hall is the startup map.
+
+The Unreal-only reference pass lives in `Unreal/Python/leafy_manor_polish.py`: candlelight, animated flame and water materials, navy fabric, warmer stone, mantel details, atmospheric fog, and a saved reference camera. The browser stays a model-placement and walkability preview.
+
 ## Build it in Unreal
 
 1. **Edit → Plugins**: enable **Python Editor Script Plugin** and **Editor Scripting Utilities**.
@@ -78,11 +88,11 @@ python3 LeafyManor/Tools/validate_blockout.py --radius 42 --half-height 96   # U
 ```
 
 **Current result: PASS for both capsules** (0 errors, 0 warnings).
-* 605 m² is walkable and reachable from the PlayerStart.
+* 593.5 m² is reachable with the character capsule; 511.4 m² with the Unreal template capsule.
 * All 25 test points are reachable on foot: both stairs, every balcony, behind the stairs, the lounges, the porch.
 * There are no drops into the void and no dead-end pockets.
 
-Reports and maps are in `Docs/Validation/`. The Unreal script has also been run against a mocked `unreal` module to check its own logic; the real engine run is still to do.
+Reports and maps are in `Docs/Validation/`. The Unreal script has also been run against a mocked `unreal` module to check its own logic; the standalone Unreal 5.6 build has also completed, with no missing actor meshes or duplicate actor labels.
 
 ## Play-test checklist
 
@@ -122,6 +132,6 @@ LeafyManor/
 | 7 Replace blockout with real models | Done: 88 models from your sheets + a procedural staircase |
 | 8 Materials | Done: kit materials from your textures, marble checker floor, stair marble and carpet |
 | 9–10 Furniture, props, plants, decoration | Done (first pass) |
-| 11 Lighting | Work lights only: chandeliers, fireplaces, fountain, sconces, moon. The full mood pass is next |
-| 12 Fountain water and FX | Not started (Niagara water, fire, candle flicker) |
+| 11 Lighting | Unreal reference pass: warm practicals, blue fountain, Lumen, fog and controlled exposure |
+| 12 Fountain water and FX | Animated material water streams and flame meshes; candle light-function flicker |
 | 13–14 Optimisation, final test | Nanite on; profiling needs your in-editor run |

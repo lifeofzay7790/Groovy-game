@@ -889,7 +889,7 @@ function enterEdit() {
   mode = 'edit';
   keys.clear();
   if (document.pointerLockElement) document.exitPointerLock();
-  ed.target.set(player.position.x, player.position.y, player.position.z);
+  ed.target.set(0, 1.5, 0);
   ed.yaw = camYaw;
   $('start').hidden = true;
   $('hud').hidden = true;
