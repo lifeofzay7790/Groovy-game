@@ -22,7 +22,7 @@ simple collision, and exported one FBX per model into `LeafyManor/Models/`. Ever
 ## Still missing
 Nothing from the original list. (The ornamental-statues upload added knights, lions, dogs, busts, clocks, fireplaces and the chandelier.)
 
-## Models (94)
+## Models (99)
 
 | Model | Folder | Used for | Size W × D × H (cm) | Triangles | Collision | Source (your file, piece) |
 |---|---|---|---|---|---|---|
@@ -120,6 +120,11 @@ Nothing from the original list. (The ornamental-statues upload added knights, li
 | `SM_LM_Armchair_Velvet_01` | Furniture | Lounge wingback armchairs | 86.8 × 73.9 × 100 | 30k | box | ornate furniture GLB P03 |
 | `SM_LM_Pedestal_Grand_01` | Props | Marble pedestals under the fountain lions | 79 × 80.3 × 100 | 20k | box | ornate furniture GLB P02 |
 | `SM_LM_LampPost_01` | Props | Lantern posts along the walkway (lit) | 57 × 56.7 × 180 | 20k | box | ornate furniture GLB P01 |
+| `SM_LM_Banner_GoodPlants_01` | Props | West upper wall banner, "GOOD PLANTS BETTER PEOPLE" | 264 × 13 × 394.5 | 5k | none | built by `build_crafted.py` |
+| `SM_LM_Banner_HigherTogether_01` | Props | East upper wall banner, "HIGHER TOGETHER" | 264 × 13 × 394.5 | 5k | none | built by `build_crafted.py` |
+| `SM_LM_Rug_NavyLeaf_01` | Props | Navy and gold leaf rug, south of the fountain | 740 × 680 × 1.2 | <1k | none | built by `build_crafted.py` |
+| `SM_LM_Rug_NavyCrown_01` | Props | Navy and gold crown rugs (north, vestibule, lounges) | 340 × 340 × 1.2 | <1k | none | built by `build_crafted.py` |
+| `SM_LM_FountainWater_01` | Props | Glowing water surfaces and falling curtain for the fountain (same pivot as the fountain; material `M_LM_Water`) | 324 × 324 × 96 | 2k | none | built by `build_crafted.py` |
 
 Per-sheet piece numbers are shown in `Docs/Models/Sheet_<name>.png`.
 
@@ -130,3 +135,10 @@ Per-sheet piece numbers are shown in `Docs/Models/Sheet_<name>.png`.
 3. Add the pieces to `mapping.json`. Then run `process_pieces.py mapping.json <out_dir> <names…>` and copy the FBX files into `Models/`.
 4. Add the models to `Unreal/Python/leafy_manor_kit.py`.
 5. Put the new models in the browser version with `Tools/WebWalkthrough/add_web_models.sh` (`KIT_OUT_DIR=<out_dir>`).
+
+## Crafted models (banners, rugs, fountain water)
+
+These are generated rather than split from a sheet, and share the texture set `T_LM_Kit_Crafted_*`:
+* `python Tools/KitProcessing/crafted_textures.py` draws the textures: banner text in Cinzel (SIL Open Font License, `Tools/KitProcessing/fonts/`), the rug designs, gold and fringe.
+* `python Tools/KitProcessing/build_crafted.py <out_dir>` builds the models into `Models/Props/` and writes previews for the browser version.
+To change the banner wording, edit `banners` in `crafted_textures.py`, then re-run both scripts and `add_web_models.sh`.

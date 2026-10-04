@@ -520,6 +520,42 @@ def _kit_instance(name, folder, parent, spec, scalars=None):
     return mi
 
 
+def ensure_water_material(folder):
+    """M_LM_Water: unlit, translucent, two-sided glowing water for SM_LM_FountainWater_01. Bands move along the
+    mesh's V (outward on the pools, downward on the curtain) and wobble along U."""
+    mat, created = _new_asset("M_LM_Water", folder, unreal.Material, unreal.MaterialFactoryNew())
+    if not created:
+        return mat
+    for prop, value in (("blend_mode", unreal.BlendMode.BLEND_TRANSLUCENT),
+                        ("shading_model", unreal.MaterialShadingModel.MSM_UNLIT), ("two_sided", True)):
+        mat.set_editor_property(prop, value)
+    S, C = unreal.MaterialExpressionScalarParameter, unreal.MaterialExpressionComponentMask
+    Mul, Add, Sine = unreal.MaterialExpressionMultiply, unreal.MaterialExpressionAdd, unreal.MaterialExpressionSine
+    uv = _expr(mat, unreal.MaterialExpressionTextureCoordinate, -1400, 0)
+    u = _op(mat, C, -1250, -60, uv, r=True, g=False, b=False, a=False)
+    v = _op(mat, C, -1250, 60, uv, r=False, g=True, b=False, a=False)
+    wob = _op(mat, Mul, -900, -60, _op(mat, Sine, -1000, -60, _op(mat, Mul, -1100, -60, u, const_b=18.0), period=6.2832),
+              const_b=1.5)
+    t = _op(mat, Mul, -1100, 200, _expr(mat, unreal.MaterialExpressionTime, -1250, 200),
+            _expr(mat, S, -1250, 300, parameter_name="FlowSpeed", default_value=5.0))
+    phase = _op(mat, Add, -800, 100, _op(mat, Add, -900, 100, _op(mat, Mul, -1000, 60, v,
+                                                                  _expr(mat, S, -1100, 120, parameter_name="Bands", default_value=40.0)),
+                                         wob), t)
+    band = _op(mat, Add, -500, 100, _op(mat, Mul, -600, 100, _op(mat, Sine, -700, 100, phase, period=6.2832), const_b=0.5),
+               const_b=0.5)
+    col = _expr(mat, unreal.MaterialExpressionVectorParameter, -500, -150, parameter_name="WaterColor",
+                default_value=unreal.LinearColor(0.15, 0.45, 1.0, 1.0))
+    glow = _op(mat, Mul, -300, -50, _op(mat, Add, -350, 100, _op(mat, Mul, -420, 100, band, const_b=0.45), const_b=0.55),
+               _expr(mat, S, -500, 250, parameter_name="Glow", default_value=8.0))
+    MEL.connect_material_property(_op(mat, Mul, -150, -100, col, glow), "", unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    op = _op(mat, Mul, -150, 200, _op(mat, Add, -300, 200, _op(mat, Mul, -400, 250, band, const_b=0.3), const_b=0.7),
+             _expr(mat, S, -300, 350, parameter_name="Opacity", default_value=0.5))
+    MEL.connect_material_property(op, "", unreal.MaterialProperty.MP_OPACITY)
+    MEL.recompile_material(mat)
+    EAL.save_loaded_asset(mat)
+    return mat
+
+
 def _set_tint(mi, rgb):
     want = unreal.LinearColor(rgb[0], rgb[1], rgb[2], 1.0)
     have = MEL.get_material_instance_vector_parameter_value(mi, "Tint")
@@ -535,7 +571,8 @@ def ensure_kit_materials():
     folder = ROOT + "/Materials/Kit"
     master = ensure_kit_master(folder)
     mats = {"FloorChecker": ensure_floor_checker(folder, "M_LM_FloorMarble", polished=True) if MOOD
-            else ensure_floor_checker(folder)}
+            else ensure_floor_checker(folder),
+            "M_LM_Water": ensure_water_material(folder)}
     specs = {}
     for f in glob.glob(os.path.join(MODELS_DIR, "Textures", "T_LM_Kit_*_BaseColor.*")):
         sheet = os.path.basename(f)[len("T_LM_Kit_"):].rsplit("_BaseColor", 1)[0]

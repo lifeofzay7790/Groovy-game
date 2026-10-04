@@ -475,6 +475,23 @@ const protos = {};                           // mesh name -> [{geometry, materia
     protos[name] = parts;
   }
 }
+// fountain water: additive, two-sided glow with bands flowing along V (outward on the pools, down the curtain)
+const waterTex = (() => {
+  const c = document.createElement('canvas');
+  c.width = 8; c.height = 128;
+  const g = c.getContext('2d');
+  for (let y = 0; y < 128; y++) {
+    const k = 0.55 + 0.45 * Math.sin(y / 128 * Math.PI * 2 * 6);
+    g.fillStyle = `rgb(${Math.round(70 * k)},${Math.round(150 * k)},${Math.round(255 * k)})`;
+    g.fillRect(0, y, 8, 1);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+})();
+const waterSurfaceMat = new THREE.MeshBasicMaterial({ map: waterTex, transparent: true, opacity: 0.6, side: THREE.DoubleSide,
+  blending: THREE.AdditiveBlending, depthWrite: false, fog: false });
+for (const part of protos.SM_LM_FountainWater_01 || []) part.material = waterSurfaceMat;
 // fixed models (walls, stairs, trims): one instanced draw per part
 {
   const tmp = new THREE.Matrix4(), q = new THREE.Quaternion(), eul = new THREE.Euler(), v3 = new THREE.Vector3(), s3 = new THREE.Vector3();
@@ -1287,6 +1304,7 @@ function frame() {
     const k = u.slow ? 1 + 0.06 * Math.sin(t * 1.3) : 1 + 0.12 * Math.sin(t * 11 + u.seed) + 0.07 * Math.sin(t * 23.7 + u.seed * 3);
     s.scale.setScalar(u.size * k);
   }
+  waterTex.offset.y = -t * 0.4;
   for (const l of lamps) if (l.userData.flicker) l.intensity = l.userData.base * (1 + 0.15 * Math.sin(t * 9) + 0.08 * Math.sin(t * 21));
 
   if (mode === 'play') {
